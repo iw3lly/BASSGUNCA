@@ -6,6 +6,7 @@ const pool = require('./config/db');
 const usuarioRoutes = require('./routes/usuarioRoutes'); 
 const eventoRoutes = require('./routes/eventoRoutes');
 const feedRoutes = require('./routes/feedRoutes');
+const usuarioController = require('./controllers/usuarioController');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/feed', feedRoutes); 
+app.post('/api/usuarios/login', usuarioController.login);
 
 app.get('/', (req, res) => {
     res.json({ status: 'ok', mensagem: '🔥 Bem-vindo à API do Bassgunça!' });

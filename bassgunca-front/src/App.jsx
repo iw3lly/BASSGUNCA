@@ -156,14 +156,25 @@ function App() {
 
   return (
     <div className="dashboard-container">
-      <aside className="sidebar">
+   <aside className="sidebar">
         <img src={logoImg} alt="Logo" className="logo-img-side" />
+        
         <nav className="menu-nav">
           <div className={`menu-item fonte-quadrada ${telaAtual === 'dashboard' ? 'ativo' : ''}`} onClick={voltarParaDashboard}>DASHBOARD</div>
           <div className={`menu-item fonte-quadrada ${telaAtual === 'eventos' ? 'ativo' : ''}`} onClick={() => setTelaAtual('eventos')}>EVENTOS</div>
+          <div className={`menu-item fonte-quadrada ${telaAtual === 'artistas' ? 'ativo' : ''}`} onClick={() => setTelaAtual('artistas')}>ARTISTAS</div>
           <div className={`menu-item fonte-quadrada ${telaAtual === 'feed' ? 'ativo' : ''}`} onClick={() => setTelaAtual('feed')}>FEED</div>
         </nav>
-        <button className="btn-sair fonte-quadrada" onClick={handleSair}>SAIR</button>
+
+        <div style={{ flexGrow: 1 }}></div>
+
+        <nav className="menu-nav" style={{ borderTop: '1px solid #222', paddingTop: '20px' }}>
+          <div className={`menu-item fonte-quadrada ${telaAtual === 'meus_eventos' ? 'ativo' : ''}`} onClick={() => setTelaAtual('meus_eventos')}>MEUS EVENTOS</div>
+          <div className={`menu-item fonte-quadrada ${telaAtual === 'meu_perfil' ? 'ativo' : ''}`} onClick={() => setTelaAtual('meu_perfil')}>MEU PERFIL</div>
+          <div className={`menu-item fonte-quadrada ${telaAtual === 'configuracoes' ? 'ativo' : ''}`} onClick={() => setTelaAtual('configuracoes')}>CONFIGURAÇÕES</div>
+        </nav>
+
+        <button className="btn-sair fonte-quadrada" style={{ marginTop: '20px' }} onClick={handleSair}>SAIR</button>
       </aside>
 
       <main className="main-content">
@@ -299,9 +310,38 @@ function App() {
           <PerfilUsuario perfil={perfilSelecionado} eventosDoPerfil={eventosDoPerfil} onVoltar={voltarParaDashboard} />
         )}
 
+
+        {telaAtual === 'artistas' && (
+          <div style={{ padding: '30px', color: '#fff' }}>
+            <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>ARTISTAS DA CENA</h1>
+            <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: O catálogo completo de DJs e Produtores.</p>
+          </div>
+        )}
+
+        {telaAtual === 'meus_eventos' && (
+          <div style={{ padding: '30px', color: '#fff' }}>
+            <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>MEUS EVENTOS</h1>
+            <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Rolês que você criou ou marcou presença.</p>
+          </div>
+        )}
+
+        {telaAtual === 'meu_perfil' && (
+          <div style={{ padding: '30px', color: '#fff' }}>
+            <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>MEU PERFIL</h1>
+            <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Edite sua foto, bio e links do SoundCloud.</p>
+          </div>
+        )}
+
+        {telaAtual === 'configuracoes' && (
+          <div style={{ padding: '30px', color: '#fff' }}>
+            <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>CONFIGURAÇÕES</h1>
+            <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Ajustes de conta e notificações.</p>
+          </div>
+        )}
+
+
       </main> 
 
-      {/* MODAL DE CRIAR EVENTO */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
