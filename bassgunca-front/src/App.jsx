@@ -5,7 +5,10 @@ import Login from './Login'
 import DetalheEvento from './pages/DetalheEvento'
 import PerfilUsuario from './pages/PerfilUsuario'
 import ListaEventos from './pages/ListaEventos'
-import Home from './pages/Home' // Importando a nova página
+import Home from './pages/Home'
+import Footer from './components/Footer'; 
+import Sidebar from './components/Sidebar';
+import Artistas from './pages/Artistas';
 
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(() => {
@@ -14,7 +17,7 @@ function App() {
   }) 
 
   const [eventos, setEventos] = useState([])
-  const [telaAtual, setTelaAtual] = useState('home') // Nome atualizado para 'home'
+  const [telaAtual, setTelaAtual] = useState('home') 
   const [feed, setFeed] = useState([])
   const [novoPost, setNovoPost] = useState('')
   const [showModal, setShowModal] = useState(false)
@@ -23,7 +26,6 @@ function App() {
   const [perfilSelecionado, setPerfilSelecionado] = useState(null)
   const [eventosDoPerfil, setEventosDoPerfil] = useState([])
 
-  // FUNÇÕES DE CARREGAMENTO
   const carregarFeed = async () => {
     try {
       const resposta = await fetch('http://localhost:3000/api/feed');
@@ -47,7 +49,6 @@ function App() {
     }
   }, [usuarioLogado])
 
-  // HANDLERS
   const handleToggleInteresse = async (idEvento) => {
     const meuVulgo = (usuarioLogado.vulgo || usuarioLogado.nome).toUpperCase();
     try {
@@ -107,25 +108,18 @@ function App() {
 
   const eventosAtivos = eventos.filter(evento => new Date(evento.data_hora) > new Date());
 
-  return (
+ return (
     <div className="dashboard-container">
-      <aside className="sidebar">
-        <img src={logoImg} alt="Logo" className="logo-img-side" />
-        <nav className="menu-nav">
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'home' ? 'ativo' : ''}`} onClick={voltarParaHome}>HOME</div>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'eventos' ? 'ativo' : ''}`} onClick={() => setTelaAtual('eventos')}>EVENTOS</div>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'artistas' ? 'ativo' : ''}`} onClick={() => setTelaAtual('artistas')}>ARTISTAS</div>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'feed' ? 'ativo' : ''}`} onClick={() => setTelaAtual('feed')}>FEED</div>
-        </nav>
-        <div style={{ flexGrow: 1 }}></div>
-        <nav className="menu-nav" style={{ borderTop: '1px solid #222', paddingTop: '20px' }}>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'meus_eventos' ? 'ativo' : ''}`} onClick={() => setTelaAtual('meus_eventos')}>MEUS EVENTOS</div>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'meu_perfil' ? 'ativo' : ''}`} onClick={() => setTelaAtual('meu_perfil')}>MEU PERFIL</div>
-          <div className={`menu-item fonte-quadrada ${telaAtual === 'configuracoes' ? 'ativo' : ''}`} onClick={() => setTelaAtual('configuracoes')}>CONFIGURAÇÕES</div>
-        </nav>
-        <button className="btn-sair fonte-quadrada" style={{ marginTop: '20px' }} onClick={handleSair}>SAIR</button>
-      </aside>
+      {/* 👇 A SIDEBAR COMPONENTIZADA 👇 */}
+      <Sidebar 
+        logoImg={logoImg}
+        telaAtual={telaAtual}
+        setTelaAtual={setTelaAtual}
+        voltarParaHome={voltarParaHome}
+        handleSair={handleSair}
+      />
 
+      {/* 👇 TODO O RESTO DO SITE FICA AQUI DENTRO 👇 */}
       <main className="main-content">
         <header className="dash-header">
           <div className="user-info">
@@ -135,7 +129,6 @@ function App() {
           <button className="btn-destaque fonte-quadrada" onClick={() => setShowModal(true)}>+ NOVO EVENTO</button>
         </header>
 
-        {/* 🏠 TELA HOME (PÁGINA SEPARADA) */}
         {telaAtual === 'home' && (
           <Home 
             eventosAtivos={eventosAtivos}
@@ -150,7 +143,6 @@ function App() {
           />
         )}
 
-        {/* 🎟️ TELA EXPLORAR EVENTOS (PÁGINA SEPARADA) */}
         {telaAtual === 'eventos' && (
           <ListaEventos 
             eventos={eventos} 
@@ -160,20 +152,29 @@ function App() {
           />
         )}
 
-        {/* 🚦 OUTRAS TELAS */}
+        {telaAtual === 'artistas' && (
+  <Artistas 
+    eventos={eventos} 
+    abrirPerfilUsuario={abrirPerfilUsuario} 
+  />
+)}
+        
         {telaAtual === 'detalhe_evento' && <DetalheEvento evento={eventoSelecionado} onVoltar={voltarParaHome} />}
         {telaAtual === 'perfil_usuario' && <PerfilUsuario perfil={perfilSelecionado} eventosDoPerfil={eventosDoPerfil} onVoltar={voltarParaHome} />}
-
-        {/* PLACEHOLDERS PARA TELAS FUTURAS */}
-        {['artistas', 'meus_eventos', 'meu_perfil', 'configuracoes'].includes(telaAtual) && (
+        
+        {/* PLACEHOLDERS APENAS UMA VEZ */}
+        {['meus_eventos', 'meu_perfil', 'configuracoes'].includes(telaAtual) && (
           <div style={{ padding: '30px', color: '#fff' }}>
             <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>{telaAtual.replace('_', ' ').toUpperCase()}</h1>
             <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Novas funcionalidades para a cena.</p>
           </div>
         )}
-      </main> 
+        
+        <Footer setTelaAtual={setTelaAtual} setShowModal={setShowModal} />
 
-      {/* MODAL DE CRIAÇÃO (FICA NO APP POR SER GLOBAL) */}
+      </main>
+
+      {/* 👇 MODAL GLOBAL FICA FORA DO MAIN 👇 */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-box" style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>

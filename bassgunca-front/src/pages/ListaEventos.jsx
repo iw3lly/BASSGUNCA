@@ -1,105 +1,96 @@
 import React, { useState } from 'react';
+import CardEvento from '../components/CardEvento'; // IMPORTANDO O COMPONENTE NOVO
 
 function ListaEventos({ eventos, abrirDetalheEvento, handleToggleInteresse, usuarioLogado }) {
-  const [filtroTexto, setFiltroTexto] = useState('');
-  const [filtroData, setFiltroData] = useState('');
-  const [filtroTipo, setFiltroTipo] = useState('todos');
+  const [buscaGeral, setBuscaGeral] = useState('');
+  const [filtroTipo, setFiltroTipo] = useState('todos'); 
+  const [filtroPreco, setFiltroPreco] = useState('todos'); 
 
   const eventosFiltrados = eventos.filter(evento => {
-    const matchesTexto = 
-      evento.titulo.toLowerCase().includes(filtroTexto.toLowerCase()) ||
-      (evento.generos && evento.generos.toLowerCase().includes(filtroTexto.toLowerCase())) ||
-      (evento.lista_artistas && evento.lista_artistas.toLowerCase().includes(filtroTexto.toLowerCase()));
+    const termo = buscaGeral.toLowerCase();
+    const matchesBusca = 
+      evento.titulo.toLowerCase().includes(termo) ||
+      (evento.generos && evento.generos.toLowerCase().includes(termo)) ||
+      (evento.local && evento.local.toLowerCase().includes(termo)) ||
+      (evento.lista_artistas && evento.lista_artistas.toLowerCase().includes(termo));
 
-    const matchesData = filtroData === '' || evento.data_hora.includes(filtroData);
     const matchesTipo = filtroTipo === 'todos' || evento.tipo_evento === filtroTipo;
 
-    return matchesTexto && matchesData && matchesTipo;
+    return matchesBusca && matchesTipo;
   });
 
-  const meuVulgo = (usuarioLogado.vulgo || usuarioLogado.nome).toUpperCase();
-
   return (
-    <section className="eventos-container" style={{ padding: '30px' }}>
-      <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem', marginBottom: '20px' }}>
-        EXPLORAR EVENTOS
-      </h1>
-
-      {/* BARRA DE FILTROS */}
-      <div className="filtros-bar" style={{ 
-        background: '#0a0a0a', 
-        padding: '20px', 
-        border: '1px solid #222', 
-        marginBottom: '30px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '15px'
+    <section className="explorar-container">
+      
+      {/* 1. HERO SECTION (Com o seu ajuste) */}
+      <div className="explorar-hero" style={{ 
+        background: 'linear-gradient(180deg, #1a0005 0%, #0a0a0a 100%)', 
+        padding: '60px 30px', 
+        borderBottom: '1px solid #333',
+        textAlign: 'center'
       }}>
-        <div>
-          <label className="fonte-quadrada" style={{ color: '#555', fontSize: '0.8rem' }}>BUSCA GERAL</label>
+        <h1 className="fonte-quadrada" style={{ color: '#fff', fontSize: '3rem', marginBottom: '10px' }}>
+          DESCUBRA A <span style={{ color: '#ff003c' }}>CENA</span>
+        </h1>
+        <p className="fonte-texto" style={{ color: '#aaa', marginBottom: '30px' }}>
+          Encontre seu próximo grave.
+        </p>
+
+        <div style={{ maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
+          <span style={{ position: 'absolute', left: '20px', top: '15px', fontSize: '1.2rem' }}>🔎</span>
           <input 
             type="text" 
-            placeholder="Gênero, Artista ou Nome..." 
-            className="input-bruto fonte-texto"
-            value={filtroTexto}
-            onChange={(e) => setFiltroTexto(e.target.value)} 
+            placeholder="Busque por rolê, DJ, gênero ou pico." 
+            className="fonte-texto"
+            value={buscaGeral}
+            onChange={(e) => setBuscaGeral(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '18px 20px 18px 55px',
+              fontSize: '1.2rem',
+              background: '#000',
+              border: '2px solid #333',
+              color: '#fff',
+              outline: 'none',
+              borderRadius: '0', 
+              transition: 'all 0.3s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#ff003c'}
+            onBlur={(e) => e.target.style.borderColor = '#333'}
           />
         </div>
-        <div>
-          <label className="fonte-quadrada" style={{ color: '#555', fontSize: '0.8rem' }}>DATA</label>
-          <input 
-            type="date" 
-            className="input-bruto fonte-texto" 
-            style={{ colorScheme: 'dark' }}
-            value={filtroData}
-            onChange={(e) => setFiltroData(e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="fonte-quadrada" style={{ color: '#555', fontSize: '0.8rem' }}>TIPO</label>
-          <select className="input-bruto fonte-texto" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-            <option value="todos">TODOS OS FORMATOS</option>
-            <option value="unico">CLUB / ÚNICO</option>
-            <option value="festival">FESTIVAL</option>
-          </select>
+
+        {/* FILTROS RÁPIDOS */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
+          <button onClick={() => setFiltroTipo('todos')} className="fonte-quadrada" style={{ padding: '8px 20px', background: filtroTipo === 'todos' ? '#ff003c' : 'transparent', border: '1px solid #ff003c', color: '#fff', cursor: 'pointer' }}>TUDO</button>
+          <button onClick={() => setFiltroTipo('unico')} className="fonte-quadrada" style={{ padding: '8px 20px', background: filtroTipo === 'unico' ? '#ff003c' : 'transparent', border: '1px solid #ff003c', color: '#fff', cursor: 'pointer' }}>CLUB / ÚNICO</button>
+          <button onClick={() => setFiltroTipo('festival')} className="fonte-quadrada" style={{ padding: '8px 20px', background: filtroTipo === 'festival' ? '#ff003c' : 'transparent', border: '1px solid #ff003c', color: '#fff', cursor: 'pointer' }}>FESTIVAIS</button>
+          <button onClick={() => setFiltroPreco(filtroPreco === '0800' ? 'todos' : '0800')} className="fonte-quadrada" style={{ padding: '8px 20px', background: filtroPreco === '0800' ? '#fff' : 'transparent', border: '1px solid #fff', color: filtroPreco === '0800' ? '#000' : '#fff', cursor: 'pointer' }}>💸 SÓ 0800</button>
         </div>
       </div>
 
-      {/* RESULTADOS */}
-      <div className="event-list">
+      {/* 2. RESULTADOS Mapeando o Componente */}
+      <div className="event-list" style={{ padding: '40px 30px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 className="fonte-quadrada" style={{ color: '#555', marginBottom: '20px', fontSize: '1.2rem' }}>
+          {eventosFiltrados.length} ROLÊS ENCONTRADOS
+        </h2>
+
         {eventosFiltrados.length > 0 ? (
           eventosFiltrados.map(e => (
-            <div key={e.id} className="event-strip" style={{ marginBottom: '15px', padding: '20px', background: '#111' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <div>
-                  <h2 
-                    className="fonte-quadrada" 
-                    style={{ color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => abrirDetalheEvento(e)}
-                  >
-                    {e.titulo}
-                  </h2>
-                  <p className="fonte-texto" style={{ color: '#aaa', margin: '5px 0' }}>📍 {e.local}</p>
-                  <span className="fonte-texto" style={{ color: '#ff003c', fontSize: '0.9rem' }}>{e.generos}</span>
-                </div>
-                
-                <div style={{ textAlign: 'right' }}>
-                   <button 
-                      onClick={() => handleToggleInteresse(e.id)}
-                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: e.interessados?.includes(meuVulgo) ? '#ff003c' : '#444', fontSize: '1.8rem' }}
-                   >
-                     {e.interessados?.includes(meuVulgo) ? '★' : '☆'}
-                   </button>
-                   <p className="fonte-quadrada" style={{ fontSize: '0.8rem', color: '#666' }}>
-                     {new Date(e.data_hora).toLocaleDateString()}
-                   </p>
-                </div>
-              </div>
-            </div>
+            <CardEvento 
+              key={e.id}
+              evento={e}
+              usuarioLogado={usuarioLogado}
+              aoClicarTitulo={abrirDetalheEvento}
+              aoClicarEstrela={handleToggleInteresse}
+            />
           ))
         ) : (
-          <div className="fonte-texto" style={{ color: '#444', textAlign: 'center', marginTop: '50px' }}>
-            NENHUM ROLÊ ENCONTRADO NA FREQUÊNCIA ATUAL.
+          <div style={{ textAlign: 'center', marginTop: '80px' }}>
+            <h1 style={{ fontSize: '4rem' }}>🕳️</h1>
+            <p className="fonte-quadrada" style={{ color: '#666', fontSize: '1.5rem', marginTop: '20px' }}>
+              NADA NO RADAR COM ESSE FILTRO.
+            </p>
           </div>
         )}
       </div>
