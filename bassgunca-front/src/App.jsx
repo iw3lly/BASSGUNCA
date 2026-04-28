@@ -9,6 +9,7 @@ import Home from './pages/Home'
 import Footer from './components/Footer'; 
 import Sidebar from './components/Sidebar';
 import Artistas from './pages/Artistas';
+import ModalCriarEvento from './components/ModalCriarEvento';
 
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(() => {
@@ -140,6 +141,7 @@ function App() {
             setNovoPost={setNovoPost}
             feed={feed}
             abrirPerfilUsuario={abrirPerfilUsuario}
+            setTelaAtual={setTelaAtual}
           />
         )}
 
@@ -174,53 +176,17 @@ function App() {
 
       </main>
 
-      {/* 👇 MODAL GLOBAL FICA FORA DO MAIN 👇 */}
+    
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-box" style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 className="fonte-quadrada" style={{marginBottom: '20px', color: '#fff'}}>CRIAR EVENTO</h2>
-            <form onSubmit={handleCriarEvento}>
-              <input type="text" placeholder="NOME DO EVENTO" className="input-bruto fonte-texto" required 
-                     value={novoEvento.titulo} onChange={e => setNovoEvento({...novoEvento, titulo: e.target.value})} />
-              <input type="text" placeholder="LOCAL" className="input-bruto fonte-texto" required 
-                     value={novoEvento.local} onChange={e => setNovoEvento({...novoEvento, local: e.target.value})} />
-              <select className="input-bruto fonte-texto" value={novoEvento.tipo_evento} 
-                      onChange={e => setNovoEvento({...novoEvento, tipo_evento: e.target.value})}>
-                <option value="unico">DIA ÚNICO / CLUB</option>
-                <option value="festival">FESTIVAL (VÁRIOS DIAS)</option>
-              </select>
-              <div style={{display: 'flex', gap: '10px'}}>
-                <div style={{flex: 1}}>
-                  <label className="fonte-texto" style={{color: '#aaa', fontSize: '0.7rem'}}>INÍCIO:</label>
-                  <input type="datetime-local" className="input-bruto fonte-texto" required 
-                         value={novoEvento.data_hora} style={{colorScheme: 'dark'}} 
-                         onChange={e => setNovoEvento({...novoEvento, data_hora: e.target.value})} />
-                </div>
-                {novoEvento.tipo_evento === 'festival' && (
-                  <div style={{flex: 1}}>
-                    <label className="fonte-texto" style={{color: '#aaa', fontSize: '0.7rem'}}>TÉRMINO:</label>
-                    <input type="datetime-local" className="input-bruto fonte-texto" required 
-                           value={novoEvento.data_fim} style={{colorScheme: 'dark'}} 
-                           onChange={e => setNovoEvento({...novoEvento, data_fim: e.target.value})} />
-                  </div>
-                )}
-              </div>
-              <input type="text" placeholder="GÊNEROS" className="input-bruto fonte-texto" 
-                     value={novoEvento.generos} onChange={e => setNovoEvento({...novoEvento, generos: e.target.value})} />
-              <input type="url" placeholder="LINK DO INGRESSO" className="input-bruto fonte-texto" 
-                     value={novoEvento.link_ingresso} onChange={e => setNovoEvento({...novoEvento, link_ingresso: e.target.value})} />
-              <textarea placeholder="LINE-UP" className="input-bruto fonte-texto" style={{ height: '80px', paddingTop: '10px' }}
-                        value={novoEvento.lista_artistas} onChange={e => setNovoEvento({...novoEvento, lista_artistas: e.target.value})} />
-              <div className="modal-btns" style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
-                <button type="button" className="btn-acao fonte-quadrada" style={{background: '#333'}} onClick={() => setShowModal(false)}>CANCELAR</button>
-                <button type="submit" className="btn-acao fonte-quadrada">GRAVAR EVENTO</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ModalCriarEvento 
+          fecharModal={() => setShowModal(false)} 
+          onEventoCriado={() => {
+            carregarEventos(); // Atualiza a lista na tela
+            setTelaAtual('eventos'); // Opcional: Joga a pessoa pra tela de eventos pra ela ver o que criou
+          }} 
+        />
       )}
     </div>
   )
 }
-
-export default App
+export default App;

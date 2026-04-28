@@ -53,11 +53,12 @@ html, body, #root {
 }
 
 .main-content { 
-  flex: 1; /* Ocupa todo o espaço que sobrar */
+  flex: 1; 
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: calc(100vw - 260px); /* Impede a tela principal de vazar por baixo do menu */
+  max-width: calc(100vw - 260px); 
+  overflow-x: hidden; 
 }
 
 /* =========================================
@@ -132,4 +133,29 @@ html, body, #root {
 /* Oculta a barra de rolagem nos carrosséis da Home pra ficar liso igual app */
 .hide-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* Container do Card para o efeito de escala */
+.card-container-home {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
+  cursor: pointer;
+}
+
+/* Quando passar o mouse no container, os cards que NÃO estão com o mouse em cima ficam opacos */
+.grid-destaque-home:hover .card-container-home:not(:hover) {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  transform: scale(0.95);
+}
+
+/* O card focado ganha destaque total */
+.card-container-home:hover {
+  transform: scale(1.05); /* 👈 Ele cresce levemente */
+  z-index: 10;
+}
+
+/* Ajuste no CardEvento para brilhar a borda no hover */
+.event-strip:hover {
+  border-color: #ff003c !important;
+  box-shadow: 0 0 20px rgba(255, 0, 60, 0.2);
 }
