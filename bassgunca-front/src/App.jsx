@@ -10,6 +10,10 @@ import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
 import Artistas from './pages/Artistas';
 import ModalCriarEvento from './components/ModalCriarEvento';
+import Header from './components/Header';
+import Feed from './components/Feed';
+import MeusEventos from './components/MeusEventos';
+import MeuPerfil from './components/MeuPerfil';
 
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(() => {
@@ -120,15 +124,12 @@ function App() {
         handleSair={handleSair}
       />
 
-      {/* 👇 TODO O RESTO DO SITE FICA AQUI DENTRO 👇 */}
-      <main className="main-content">
-        <header className="dash-header">
-          <div className="user-info">
-            <h1 className="fonte-quadrada">SALVE, {(usuarioLogado.vulgo || usuarioLogado.nome).toUpperCase()}!</h1>
-            <p className="fonte-texto" style={{color: '#aaa'}}>Sua função: {usuarioLogado.funcoes}</p>
-          </div>
-          <button className="btn-destaque fonte-quadrada" onClick={() => setShowModal(true)}>+ NOVO EVENTO</button>
-        </header>
+<main className="main-content">
+  
+  <Header 
+    usuarioLogado={usuarioLogado} 
+    setShowModal={setShowModal} 
+  />
 
         {telaAtual === 'home' && (
           <Home 
@@ -163,9 +164,36 @@ function App() {
         
         {telaAtual === 'detalhe_evento' && <DetalheEvento evento={eventoSelecionado} onVoltar={voltarParaHome} />}
         {telaAtual === 'perfil_usuario' && <PerfilUsuario perfil={perfilSelecionado} eventosDoPerfil={eventosDoPerfil} onVoltar={voltarParaHome} />}
+
+        {telaAtual === 'feed' && (
+    <Feed 
+      feed={feed}
+      novoPost={novoPost}
+      setNovoPost={setNovoPost}
+      handlePostarFeed={handlePostarFeed}
+      abrirPerfilUsuario={abrirPerfilUsuario}
+    />
+  )}
+
+
+{telaAtual === 'meus_eventos' && (
+  <MeusEventos 
+    eventos={eventosAtivos} 
+    usuarioLogado={usuarioLogado} 
+    setEventos={setEventos}
+  />
+)}
+
+{telaAtual === 'meu_perfil' && (
+  <MeuPerfil 
+    usuarioLogado={usuarioLogado} 
+    setUsuarioLogado={setUsuarioLogado} 
+  />
+)}
+
         
         {/* PLACEHOLDERS APENAS UMA VEZ */}
-        {['meus_eventos', 'meu_perfil', 'configuracoes'].includes(telaAtual) && (
+        {['configuracoes'].includes(telaAtual) && (
           <div style={{ padding: '30px', color: '#fff' }}>
             <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>{telaAtual.replace('_', ' ').toUpperCase()}</h1>
             <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Novas funcionalidades para a cena.</p>

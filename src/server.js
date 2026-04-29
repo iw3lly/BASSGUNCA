@@ -89,3 +89,45 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando lindamente na porta ${PORT}`);
 });
+
+app.put('/api/eventos/:id', (req, res) => {
+  const { id } = req.params;
+  const { 
+    titulo, data_hora, local, generos, tipo_evento, 
+    imagem_url, informacoes, contato_produtor, politica, 
+    localizacao_url, programacao 
+  } = req.body;
+
+  const query = `
+    UPDATE eventos SET 
+    titulo = ?, data_hora = ?, local = ?, generos = ?, tipo_evento = ?,
+    imagem_url = ?, informacoes = ?, contato_produtor = ?, politica = ?, 
+    localizacao_url = ?, programacao = ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [
+    titulo, data_hora, local, generos, tipo_evento, 
+    imagem_url, informacoes, contato_produtor, politica, 
+    localizacao_url, JSON.stringify(programacao), id
+  ], (err) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: "Evento atualizado com sucesso!" });
+  });
+});
+
+app.put('/api/usuarios/:id', (req, res) => {
+  const { id } = req.params;
+  const { nome, vulgo, data_nascimento, funcao, bio, foto_perfil, redes_sociais} = req.body;
+
+  const query = `
+    UPDATE usuarios SET 
+    nome = ?, vulgo = ?, data_nascimento = ?, funcao = ?, bio = ?, foto_perfil = ?, redes_sociais = ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [nome, vulgo, data_nascimento, funcao, bio, foto_perfil, redes_sociais, id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: "Perfil atualizado com sucesso!" });
+  });
+});
