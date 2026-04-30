@@ -116,18 +116,35 @@ app.put('/api/eventos/:id', (req, res) => {
   });
 });
 
-app.put('/api/usuarios/:id', (req, res) => {
-  const { id } = req.params;
-  const { nome, vulgo, data_nascimento, funcao, bio, foto_perfil, redes_sociais} = req.body;
+app.put('/api/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, vulgo, data_nascimento, funcao, bio, foto_perfil, redes_sociais } = req.body;
 
-  const query = `
-    UPDATE usuarios SET 
-    nome = ?, vulgo = ?, data_nascimento = ?, funcao = ?, bio = ?, foto_perfil = ?, redes_sociais = ?
-    WHERE id = ?
-  `;
+    const query = `
+      UPDATE usuarios SET 
+      nome = ?, vulgo = ?, data_nascimento = ?, funcao = ?, bio = ?, foto_perfil = ?, redes_sociais = ?
+      WHERE id = ?
+    `;
 
-  db.query(query, [nome, vulgo, data_nascimento, funcao, bio, foto_perfil, redes_sociais, id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.send({ message: "Perfil atualizado com sucesso!" });
-  });
+    const valores = [
+      nome, 
+      vulgo, 
+      data_nascimento, 
+      funcao, 
+      bio, 
+      foto_perfil, 
+      JSON.stringify(redes_sociais || {}), 
+      id
+    ];
+
+    // O "await" faz o Node esperar o banco terminar antes de responder
+    await pool.query(query, valores);
+    
+    res.status(200).json({ message: "Perfil atualizado com sucesso!" });
+
+  } catch (err) {
+    console.error("Erro CRÍTICO ao salvar perfil no banco:", err);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
 });

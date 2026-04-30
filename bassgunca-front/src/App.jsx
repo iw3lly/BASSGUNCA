@@ -14,6 +14,8 @@ import Header from './components/Header';
 import Feed from './components/Feed';
 import MeusEventos from './components/MeusEventos';
 import MeuPerfil from './components/MeuPerfil';
+import Configuracoes from './pages/Configuracoes';
+
 
 function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(() => {
@@ -188,12 +190,13 @@ function App() {
   <MeuPerfil 
     usuarioLogado={usuarioLogado} 
     setUsuarioLogado={setUsuarioLogado} 
+    eventos={eventos}
   />
 )}
 
         
         {/* PLACEHOLDERS APENAS UMA VEZ */}
-        {['configuracoes'].includes(telaAtual) && (
+        {[''].includes(telaAtual) && (
           <div style={{ padding: '30px', color: '#fff' }}>
             <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>{telaAtual.replace('_', ' ').toUpperCase()}</h1>
             <p className="fonte-texto" style={{ color: '#aaa', marginTop: '10px' }}>Em breve: Novas funcionalidades para a cena.</p>

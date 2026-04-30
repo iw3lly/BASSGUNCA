@@ -5,12 +5,62 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
   console.log("Lista de Eventos:", eventos);
   const [editando, setEditando] = useState(null);
 
- const meusEventos = (eventos || []).filter(e => {
+// 1. Filtramos os eventos como você já estava fazendo
+  const meusEventos = (eventos || []).filter(e => {
     const criador = String(e.criado_por || '').trim().toLowerCase();
     const logado = String(usuarioLogado?.vulgo || usuarioLogado?.nome || '').trim().toLowerCase();
-    return criador === logado;
+    return criador === logado && logado !== '';
   });
 
+  // 2. Verificamos se ele tem a "moral" de produtor no perfil
+  const temPermissaoProdutor = usuarioLogado?.funcao?.toUpperCase().includes('PRODUTOR') || 
+                               usuarioLogado?.funcao?.toUpperCase().includes('EVENTO');
+
+  // 3. Lógica de renderização da tela
+  return (
+    <div style={{ padding: '20px', minHeight: '80vh', background: '#050505' }}>
+      
+      {!temPermissaoProdutor ? (
+        /* --- TELA PARA QUEM NÃO É PRODUTOR --- */
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '100px', textAlign: 'center' }}>
+          <h1 className="fonte-quadrada" style={{ color: '#fff', fontSize: '2.5rem', textShadow: '2px 2px #ff003c' }}>
+            ACESSO RESTRITO
+          </h1>
+          <p className="fonte-texto" style={{ color: '#888', maxWidth: '500px', margin: '20px 0' }}>
+            Esta área é exclusiva para organizadores. Se você movimenta a cena e quer cadastrar seus eventos no Bassgunça, solicite seu acesso.
+          </p>
+          <button 
+            className="fonte-quadrada"
+            style={{ background: 'transparent', color: '#ff003c', border: '1px solid #ff003c', padding: '12px 25px', cursor: 'pointer', borderRadius: '4px' }}
+            onClick={() => window.open('https://wa.me/SEUNUMERO', '_blank')}
+          >
+            SOLICITAR PERFIL PRODUTOR
+          </button>
+        </div>
+
+      ) : meusEventos.length === 0 ? (
+        /* --- TELA PARA PRODUTOR QUE AINDA NÃO CRIOU NADA --- */
+        <div style={{ textAlign: 'center', marginTop: '100px' }}>
+          <h2 className="fonte-quadrada" style={{ color: '#fff' }}>VOCÊ AINDA NÃO TEM EVENTOS</h2>
+          <p className="fonte-texto" style={{ color: '#666', marginBottom: '20px' }}>Clique no botão "Novo Evento" no topo para começar.</p>
+        </div>
+
+      ) : (
+        /* --- LISTA DE EVENTOS REAL (O QUE VOCÊ JÁ TINHA) --- */
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+          <h2 className="fonte-quadrada" style={{ color: '#ff003c', gridColumn: '1/-1' }}>MEUS EVENTOS</h2>
+          {meusEventos.map(evento => (
+            <div key={evento.id} style={{ background: '#0a0a0a', border: '1px solid #1a1a1a', padding: '15px', borderRadius: '8px' }}>
+              <h3 className="fonte-quadrada">{evento.titulo}</h3>
+              {/* Seus detalhes do card aqui... */}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  
 const handleSalvar = async (e) => {
   e.preventDefault();
   
@@ -122,6 +172,88 @@ const inputStyle = {
   borderRadius: '4px',
   marginTop: '5px',
   outline: 'none'
+};
+
+const TelaMeusEventosVazia = () => {
+  return (
+    <div style={{
+      height: '80vh',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      textAlign: 'center',
+      padding: '20px',
+      background: '#050505'
+    }}>
+      {/* Ícone ou Elemento Visual */}
+      <div style={{ 
+        fontSize: '4rem', 
+        marginBottom: '20px', 
+        color: '#1a1a1a',
+        border: '2px solid #1a1a1a',
+        padding: '20px',
+        borderRadius: '50%'
+      }}>
+        🚫
+      </div>
+
+      <h1 className="fonte-quadrada" style={{ color: '#fff', fontSize: '2.5rem', marginBottom: '10px' }}>
+        PAINEL DO PRODUTOR
+      </h1>
+      
+      <p className="fonte-texto" style={{ color: '#888', maxWidth: '500px', lineHeight: '1.6', fontSize: '1.1rem' }}>
+        Parece que você ainda não tem permissão para gerenciar eventos. 
+        Esta área é exclusiva para quem movimenta a cena e organiza os corre.
+      </p>
+
+      <div style={{ marginTop: '30px', display: 'flex', gap: '15px' }}>
+        <button 
+          className="fonte-quadrada"
+          style={{
+            background: '#ff003c',
+            color: '#fff',
+            border: 'none',
+            padding: '12px 25px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+          onClick={() => window.location.href = '/feed'}
+        >
+          VOLTAR PARA O FEED
+        </button>
+
+        <button 
+          className="fonte-quadrada"
+          style={{
+            background: 'transparent',
+            color: '#ff003c',
+            border: '1px solid #ff003c',
+            padding: '12px 25px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+          onClick={() => window.open('https://wa.me/SEUNUMERO', '_blank')}
+        >
+          QUERO SER PRODUTOR
+        </button>
+      </div>
+
+      {/* Detalhe estético de fundo (opcional) */}
+      <div style={{
+        marginTop: '50px',
+        color: '#111',
+        fontSize: '5rem',
+        fontWeight: 'bold',
+        letterSpacing: '10px',
+        userSelect: 'none'
+      }} className="fonte-quadrada">
+        BASSGUNÇA
+      </div>
+    </div>
+  );
 };
 
 export default MeusEventos;
