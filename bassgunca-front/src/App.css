@@ -2,8 +2,9 @@
    1. VARIÁVEIS E RESET GLOBAL (A MÁGICA DA TELA CHEIA)
    ========================================= */
 :root {
-  --preto-absoluto: #0a0a0a;
-  --preto-painel: rgba(20, 20, 20, 0.95);
+--preto-absoluto: #0a0a0a;
+  /* Painéis agora são levemente transparentes para mostrar o fundo */
+  --preto-painel: rgba(10, 10, 10, 0.85); 
   --cinza-sujo: #444;
   --cinza-texto: #888;
   --branco-puro: #ffffff;
@@ -17,12 +18,30 @@
   margin: 0;
   padding: 0;
 }
-
 html, body, #root {
   width: 100vw;
   min-height: 100vh;
+  
+  /* Mantemos o degradê para o fundo não ficar cinza, mas sim um preto profundo */
+  background-image: 
+    linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)), 
+    url('./assets/logo.png'); 
+
+  /* AJUSTE AQUI: O tamanho da imagem (tenta 300px ou 250px se quiser menor ainda) */
+  background-size: 300px auto; 
+
+  /* Centraliza a imagem no meio da tela */
+  background-position: center; 
+
+  /* Garante que ela não vai se repetir como estampa */
+  background-repeat: no-repeat; 
+
+  /* Faz a imagem ficar fixa enquanto os cards deslizam por cima */
+  background-attachment: fixed; 
+
   background-color: var(--preto-absoluto);
   color: var(--branco-puro);
+  overflow-x: hidden;
 }
 
 .fonte-quadrada { font-family: 'Teko', sans-serif; letter-spacing: 1px; font-weight: 600; }

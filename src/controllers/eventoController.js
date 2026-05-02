@@ -12,16 +12,30 @@ const eventoController = {
         }
     },
 
-    criarEvento: async (req, res) => {
-        const { titulo, local, data_hora, generos, link_ingresso, lista_artistas } = req.body;
+   criarEvento: async (req, res) => {
+        const { 
+            titulo, local, data_hora, data_fim, valor, generos, 
+            tipo_evento, imagem_url, informacoes, contato_produtor, 
+            politica, localizacao_url, link_ingresso, lista_artistas, programacao,
+            criado_por // Adicionado aqui
+        } = req.body;
 
         try {
             const query = `
-                INSERT INTO eventos (titulo, local, data_hora, generos, link_ingresso, lista_artistas) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            `;
+                INSERT INTO eventos (
+                    titulo, local, data_hora, data_fim, valor, generos, 
+                    tipo_evento, imagem_url, informacoes, contato_produtor, 
+                    politica, localizacao_url, link_ingresso, lista_artistas, programacao, criado_por
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `; // Adicionado "criado_por" na string e mais um "?" nos valores
             
-            const valores = [titulo, local, data_hora, generos, link_ingresso, lista_artistas];
+            const valores = [
+                titulo, local, data_hora, data_fim, valor, generos, 
+                tipo_evento, imagem_url, informacoes, contato_produtor, 
+                politica, localizacao_url, link_ingresso, lista_artistas, 
+                JSON.stringify(programacao || []),
+                criado_por // Adicionado aqui nos valores
+            ];
 
             const [resultado] = await pool.query(query, valores);
 
@@ -30,12 +44,45 @@ const eventoController = {
                 id_evento: resultado.insertId 
             });
         } catch (erro) {
-            console.error("Erro no MySQL:", erro);
-            res.status(500).json({ erro: 'Erro ao criar evento. Verifique se as colunas novas existem no MySQL.' });
+            console.error("Erro no MySQL (Criar):", erro);
+            res.status(500).json({ erro: 'Erro ao criar evento.' });
         }
-    }, // 👈 OLHA A VÍRGULA SALVADORA AQUI!
+    },
 
-    // 👇 E A ESTRELINHA AGORA MORA AQUI DENTRO, NO LUGAR CERTO!
+    // --- NOVA FUNÇÃO DE ATUALIZAR (EDITAR) ---
+    atualizarEvento: async (req, res) => {
+        const { id } = req.params;
+        const { 
+            titulo, local, data_hora, data_fim, valor, generos, 
+            tipo_evento, imagem_url, informacoes, contato_produtor, 
+            politica, localizacao_url, link_ingresso, lista_artistas, programacao 
+        } = req.body;
+
+        try {
+            const query = `
+                UPDATE eventos SET 
+                titulo = ?, local = ?, data_hora = ?, data_fim = ?, valor = ?, generos = ?, 
+                tipo_evento = ?, imagem_url = ?, informacoes = ?, contato_produtor = ?, 
+                politica = ?, localizacao_url = ?, link_ingresso = ?, lista_artistas = ?, programacao = ?
+                WHERE id = ?
+            `;
+
+            const valores = [
+                titulo, local, data_hora, data_fim, valor, generos, 
+                tipo_evento, imagem_url, informacoes, contato_produtor, 
+                politica, localizacao_url, link_ingresso, lista_artistas, 
+                JSON.stringify(programacao || []), 
+                id
+            ];
+
+            await pool.query(query, valores);
+            res.json({ mensagem: 'Evento atualizado com sucesso!' });
+        } catch (erro) {
+            console.error("Erro no MySQL (Atualizar):", erro);
+            res.status(500).json({ erro: 'Erro ao atualizar evento.' });
+        }
+    },
+
     toggleInteresse: async (req, res) => {
         const { id } = req.params;
         const { vulgo } = req.body;
@@ -61,6 +108,6 @@ const eventoController = {
             res.status(500).json({ erro: "Erro ao atualizar interesse." });
         }
     }
-}; // 👈 AQUI FECHA O CONTROLLER INTEIRO
+};
 
-module.exports = eventoController; // 👈 E O EXPORT FICA LÁ NO FINAL SOZINHO
+module.exports = eventoController;

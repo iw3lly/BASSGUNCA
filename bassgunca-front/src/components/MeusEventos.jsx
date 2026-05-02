@@ -14,15 +14,24 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
   const temPermissaoProdutor = usuarioLogado?.funcao?.toUpperCase().includes('PRODUTOR') || 
                                usuarioLogado?.funcao?.toUpperCase().includes('EVENTO');
 
-  // 3. Função de salvar
-  const handleSalvar = async (e) => {
+ // 3. Função de salvar
+const handleSalvar = async (e) => {
     e.preventDefault();
     
-    // Garantimos que a programação do festival vá como texto pro banco não bugar
+    // 1. O TRUQUE DA DATA: Garante que a data mestre nunca vá vazia
+    const dataPrincipal = editando.tipo_evento === 'festival' && editando.programacao?.length > 0 
+      ? editando.programacao[0].data 
+      : editando.data_hora;
+
+    // 2. Prepara os dados pro Banco de Dados
     const dadosParaSalvar = {
       ...editando,
-      programacao: typeof editando.programacao === 'object' ? JSON.stringify(editando.programacao) : editando.programacao,
-      criado_por: usuarioLogado.vulgo 
+      data_hora: dataPrincipal, 
+      
+      // 👇 A CORREÇÃO MESTRA: A lista vai pura pro Back-end! Sem stringify aqui.
+      programacao: editando.programacao, 
+      
+      criado_por: usuarioLogado?.vulgo || usuarioLogado?.nome 
     };
 
     try {
@@ -33,18 +42,18 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
       });
 
       if (response.ok) {
-        alert("Evento atualizado na cena!");
-        setEventos(listaAntiga => 
-          listaAntiga.map(eventoItem => 
-            eventoItem.id === editando.id ? { ...eventoItem, ...dadosParaSalvar } : eventoItem
-          )
-        );
-        setEditando(null);
+        alert("🔥 Evento atualizado na cena!");
+        
+        // A SOLUÇÃO DEFINITIVA: Recarrega a página pra puxar perfeitamente do banco
+        // e limpar qualquer "sujeira" visual do React.
+        window.location.reload();
+
       } else {
-        alert("Erro ao salvar. Verifique sua conexão com o banco.");
+        alert("Erro ao salvar no banco. Verifique o terminal do servidor.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Erro na requisição:", err);
+      alert("Servidor offline ou erro de conexão.");
     }
   };
 
@@ -79,7 +88,29 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
           {/* --- BLOCO 1: TIPO E VALOR --- */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <label className="fonte-texto" style={{ color: '#666' }}>Tipo do Rolê
-              <select value={editando.tipo_evento || 'unico'} onChange={e => setEditando({...editando, tipo_evento: e.target.value})} style={inputStyle}>
+              <select 
+                value={editando.tipo_evento || 'unico'} 
+                onChange={e => {
+                  const novoTipo = e.target.value;
+                  let novaProgramacao = [...(editando.programacao || [])];
+
+                  // A MÁGICA AQUI: Se mudar pra festival e estiver vazio, puxa os dados do topo
+                  if (novoTipo === 'festival' && novaProgramacao.length === 0) {
+                    novaProgramacao = [{
+                      data: editando.data_hora || '', 
+                      valor: editando.valor || '',
+                      lineup: editando.lista_artistas || ''
+                    }];
+                  }
+
+                  setEditando({
+                    ...editando, 
+                    tipo_evento: novoTipo,
+                    programacao: novaProgramacao
+                  });
+                }} 
+                style={inputStyle}
+              >
                 <option value="unico">Evento Único (1 dia)</option>
                 <option value="festival">Festival (Vários dias)</option>
               </select>
@@ -90,17 +121,14 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
             </label>
           </div>
 
-          {/* --- BLOCO 2: DATAS GERAIS --- */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <label className="fonte-texto" style={{ color: '#666' }}>Início (Data e Hora) *
-              <input type="datetime-local" value={editando.data_hora || ''} onChange={e => setEditando({...editando, data_hora: e.target.value})} style={inputStyle} required />
-            </label>
-            {editando.tipo_evento === 'festival' && (
-              <label className="fonte-texto" style={{ color: '#666' }}>Fim do Festival *
-                <input type="datetime-local" value={editando.data_fim || ''} onChange={e => setEditando({...editando, data_fim: e.target.value})} style={inputStyle} required />
+          {/* --- BLOCO 2: DATAS GERAIS (SÓ APARECE SE FOR EVENTO ÚNICO) --- */}
+          {editando.tipo_evento !== 'festival' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <label className="fonte-texto" style={{ color: '#666' }}>Início (Data e Hora) *
+                <input type="datetime-local" value={editando.data_hora || ''} onChange={e => setEditando({...editando, data_hora: e.target.value})} style={inputStyle} required />
               </label>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* --- BLOCO 3: INFOS PRINCIPAIS --- */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', background: '#0a0a0a', padding: '20px', border: '1px solid #1a1a1a', borderRadius: '8px' }}>
@@ -140,8 +168,8 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
 
               {Array.isArray(editando.programacao) && editando.programacao.map((dia, index) => (
                 <div key={index} style={{ display: 'grid', gridTemplateColumns: 'minmax(150px, 1fr) minmax(100px, 1fr) minmax(200px, 2fr) auto', gap: '15px', marginBottom: '15px', alignItems: 'end', background: '#050505', padding: '20px', border: '1px dashed #333', borderRadius: '6px' }}>
-                  <label className="fonte-texto" style={{ color: '#888', fontSize: '0.8rem' }}>Data do Dia {index + 1}
-                    <input type="date" value={dia.data || ''} onChange={e => atualizarDia(index, 'data', e.target.value)} style={inputStyle} required />
+                  <label className="fonte-texto" style={{ color: '#888', fontSize: '0.8rem' }}>Data e Hora (Dia {index + 1})
+                    <input type="datetime-local" value={dia.data || ''} onChange={e => atualizarDia(index, 'data', e.target.value)} style={inputStyle} required />
                   </label>
                   <label className="fonte-texto" style={{ color: '#888', fontSize: '0.8rem' }}>Ingresso Dia (R$)
                     <input type="number" step="0.01" value={dia.valor || ''} onChange={e => atualizarDia(index, 'valor', e.target.value)} placeholder="0.00" style={inputStyle} />

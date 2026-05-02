@@ -92,26 +92,33 @@ app.listen(PORT, () => {
 
 app.put('/api/eventos/:id', (req, res) => {
   const { id } = req.params;
+  
+  // 1. Agora o back-end "aceita" receber os campos novos
   const { 
-    titulo, data_hora, local, generos, tipo_evento, 
+    titulo, data_hora, data_fim, valor, local, generos, tipo_evento, 
     imagem_url, informacoes, contato_produtor, politica, 
-    localizacao_url, programacao 
+    localizacao_url, link_ingresso, lista_artistas, programacao 
   } = req.body;
 
+  // 2. Adicionamos os campos na query do SQL
   const query = `
     UPDATE eventos SET 
-    titulo = ?, data_hora = ?, local = ?, generos = ?, tipo_evento = ?,
+    titulo = ?, data_hora = ?, data_fim = ?, valor = ?, local = ?, generos = ?, tipo_evento = ?,
     imagem_url = ?, informacoes = ?, contato_produtor = ?, politica = ?, 
-    localizacao_url = ?, programacao = ?
+    localizacao_url = ?, link_ingresso = ?, lista_artistas = ?, programacao = ?
     WHERE id = ?
   `;
 
-  db.query(query, [
-    titulo, data_hora, local, generos, tipo_evento, 
+  // 3. Passamos os valores na MESMA ordem das interrogações (?)
+  pool.query(query, [
+    titulo, data_hora, data_fim, valor, local, generos, tipo_evento, 
     imagem_url, informacoes, contato_produtor, politica, 
-    localizacao_url, JSON.stringify(programacao), id
+    localizacao_url, link_ingresso, lista_artistas, JSON.stringify(programacao), id
   ], (err) => {
-    if (err) return res.status(500).send(err);
+    if (err) {
+      console.error("ERRO CRÍTICO NO SQL AO SALVAR EVENTO:", err);
+      return res.status(500).send(err);
+    }
     res.send({ message: "Evento atualizado com sucesso!" });
   });
 });
