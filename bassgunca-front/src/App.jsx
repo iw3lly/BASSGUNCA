@@ -15,14 +15,29 @@ import Feed from './components/Feed';
 import MeusEventos from './components/MeusEventos';
 import MeuPerfil from './components/MeuPerfil';
 import Configuracoes from './pages/Configuracoes';
-
+import Notificacoes from './pages/Notificacoes'; // Import da nova tela de notificações
 
 function App() {
+  // 1. ESTADO DA SESSÃO COM VALIDADE (12 HORAS)
   const [usuarioLogado, setUsuarioLogado] = useState(() => {
-    const userSalvo = localStorage.getItem('@bassgunca:user')
-    return userSalvo ? JSON.parse(userSalvo) : null
-  }) 
+    const savedData = localStorage.getItem('@bassgunca:user_session'); 
+    if (savedData) {
+      const session = JSON.parse(savedData);
+      if (Date.now() > session.expiresAt) {
+        localStorage.removeItem('@bassgunca:user_session');
+        return null; // Sessão expirou
+      }
+      session.expiresAt = Date.now() + (12 * 60 * 60 * 1000); // Renova por mais 12h
+      localStorage.setItem('@bassgunca:user_session', JSON.stringify(session));
+      return session.usuario;
+    }
+    return null;
+  });
 
+  // 2. ESTADO DAS NOTIFICAÇÕES (Começa vazio, para não aparecer no F5)
+  const [notificacoes, setNotificacoes] = useState([]);
+
+  // OUTROS ESTADOS
   const [eventos, setEventos] = useState([])
   const [telaAtual, setTelaAtual] = useState('home') 
   const [feed, setFeed] = useState([])
@@ -83,17 +98,61 @@ function App() {
   }
 
   const abrirDetalheEvento = (evento) => { setEventoSelecionado(evento); setTelaAtual('detalhe_evento'); }
-  const abrirPerfilUsuario = (vulgoClicado) => {
-    setPerfilSelecionado({ vulgo: vulgoClicado });
-    const rolesDoCara = eventos.filter(e => e.lista_artistas && e.lista_artistas.toUpperCase().includes(vulgoClicado.toUpperCase()));
-    setEventosDoPerfil(rolesDoCara);
-    setTelaAtual('perfil_usuario');
+  
+  // NOVA FUNÇÃO DE ABRIR PERFIL (PUXANDO DO BANCO + REGEX)
+  const abrirPerfilUsuario = async (vulgoClicado) => {
+    try {
+      const resposta = await fetch(`http://localhost:3000/api/usuarios/buscar/${vulgoClicado}`);
+      const dadosUtilizador = await resposta.json();
+      
+      if (resposta.ok) {
+        setPerfilSelecionado(dadosUtilizador);
+      } else {
+        setPerfilSelecionado({ vulgo: vulgoClicado, nome: 'Artista da Cena' });
+      }
+
+      const regexPalavraExata = new RegExp(`\\b${vulgoClicado}\\b`, 'i');
+      const rolesDoCara = eventos.filter(e => 
+        e.lista_artistas && regexPalavraExata.test(e.lista_artistas)
+      );
+      
+      setEventosDoPerfil(rolesDoCara);
+      setTelaAtual('perfil_usuario');
+    } catch (erro) {
+      console.error("Erro ao carregar perfil completo:", erro);
+      setPerfilSelecionado({ vulgo: vulgoClicado });
+      setTelaAtual('perfil_usuario');
+    }
   }
+
   const voltarParaHome = () => { setTelaAtual('home'); setEventoSelecionado(null); setPerfilSelecionado(null); }
 
-  const handleLoginSuccess = (usuario) => { setUsuarioLogado(usuario); localStorage.setItem('@bassgunca:user', JSON.stringify(usuario)); }
-  const handleSair = () => { setUsuarioLogado(null); localStorage.removeItem('@bassgunca:user'); }
+  // LOGIN (COM GERAÇÃO DE SESSÃO E NOTIFICAÇÃO DE BOAS-VINDAS)
+  const handleLoginSuccess = (usuario) => { 
+    setUsuarioLogado(usuario); 
+    
+    const session = {
+      usuario: usuario,
+      expiresAt: Date.now() + (12 * 60 * 60 * 1000)
+    };
+    localStorage.setItem('@bassgunca:user_session', JSON.stringify(session)); 
 
+    setNotificacoes([{ 
+      id: Date.now(), 
+      tipo: 'sistema', 
+      lida: false, 
+      texto: `SISTEMA: Salve ${(usuario.vulgo || usuario.nome).toUpperCase()}! Acesso VIP confirmado.`, 
+      tempo: 'Agora mesmo' 
+    }]);
+  }
+  
+  // LOGOUT
+  const handleSair = () => { 
+    setUsuarioLogado(null); 
+    localStorage.removeItem('@bassgunca:user_session'); 
+  }
+
+  // CRIAR EVENTO (COM GERAÇÃO DE NOTIFICAÇÃO NO RADAR)
   const handleCriarEvento = async (e) => {
     e.preventDefault()
     try {
@@ -105,6 +164,10 @@ function App() {
       if (resposta.ok) {
         alert("🔥 Evento adicionado ao line-up!");
         setShowModal(false);
+        
+        // Notificação de evento criado
+        setNotificacoes(prev => [{ id: Date.now(), tipo: 'radar', lida: false, texto: `SUCESSO: Seu evento "${novoEvento.titulo}" foi adicionado ao radar!`, tempo: 'Agora' }, ...prev]);
+        
         setNovoEvento({ titulo: '', local: '', data_hora: '', data_fim: '', tipo_evento: 'unico', generos: '', link_ingresso: '', lista_artistas: '' });
         carregarEventos();
       }
@@ -114,10 +177,14 @@ function App() {
   if (!usuarioLogado) return <Login onLogin={handleLoginSuccess} />;
 
   const eventosAtivos = eventos.filter(evento => new Date(evento.data_hora) > new Date());
+  const [eventoSendoEditado, setEventoSendoEditado] = useState(null);
+  const handleAbrirEdicao = (evento) => {
+  setEventoSendoEditado(evento);
+  setShowModal(true);
+};
 
- return (
+  return (
     <div className="dashboard-container">
-      {/* 👇 A SIDEBAR COMPONENTIZADA 👇 */}
       <Sidebar 
         logoImg={logoImg}
         telaAtual={telaAtual}
@@ -126,12 +193,14 @@ function App() {
         handleSair={handleSair}
       />
 
-<main className="main-content">
-  
-  <Header 
-    usuarioLogado={usuarioLogado} 
-    setShowModal={setShowModal} 
-  />
+      <main className="main-content">
+        
+        <Header 
+          usuarioLogado={usuarioLogado} 
+          setShowModal={setShowModal} 
+          setTelaAtual={setTelaAtual}
+          notificacoes={notificacoes}
+        />
 
         {telaAtual === 'home' && (
           <Home 
@@ -158,44 +227,55 @@ function App() {
         )}
 
         {telaAtual === 'artistas' && (
-  <Artistas 
-    eventos={eventos} 
-    abrirPerfilUsuario={abrirPerfilUsuario} 
-  />
-)}
+          <Artistas 
+            eventos={eventos} 
+            abrirPerfilUsuario={abrirPerfilUsuario} 
+          />
+        )}
         
         {telaAtual === 'detalhe_evento' && <DetalheEvento evento={eventoSelecionado} onVoltar={voltarParaHome} />}
-        {telaAtual === 'perfil_usuario' && <PerfilUsuario perfil={perfilSelecionado} eventosDoPerfil={eventosDoPerfil} onVoltar={voltarParaHome} />}
+        {telaAtual === 'perfil_usuario' && <PerfilUsuario perfil={perfilSelecionado} eventos={eventos} usuarioLogado={usuarioLogado} onVoltar={voltarParaHome} />}
 
         {telaAtual === 'feed' && (
-    <Feed 
-      feed={feed}
-      novoPost={novoPost}
-      setNovoPost={setNovoPost}
-      handlePostarFeed={handlePostarFeed}
-      abrirPerfilUsuario={abrirPerfilUsuario}
-    />
-  )}
+          <Feed 
+            feed={feed}
+            novoPost={novoPost}
+            setNovoPost={setNovoPost}
+            handlePostarFeed={handlePostarFeed}
+            abrirPerfilUsuario={abrirPerfilUsuario}
+          />
+        )}
 
-
-{telaAtual === 'meus_eventos' && (
+       {telaAtual === 'meus_eventos' && (
   <MeusEventos 
-    eventos={eventosAtivos} 
+    eventos={eventos} // Use todos os eventos para o produtor ver o histórico
     usuarioLogado={usuarioLogado} 
-    setEventos={setEventos}
+    onEditar={handleAbrirEdicao}
+    onExcluir={async (id) => {
+       if(window.confirm("Deseja mesmo excluir este evento?")) {
+         await fetch(`http://localhost:3000/api/eventos/${id}`, { method: 'DELETE' });
+         carregarEventos();
+       }
+    }}
   />
 )}
 
-{telaAtual === 'meu_perfil' && (
-  <MeuPerfil 
-    usuarioLogado={usuarioLogado} 
-    setUsuarioLogado={setUsuarioLogado} 
-    eventos={eventos}
-  />
-)}
+        {telaAtual === 'meu_perfil' && (
+          <MeuPerfil 
+            usuarioLogado={usuarioLogado} 
+            setUsuarioLogado={setUsuarioLogado} 
+            eventos={eventos}
+          />
+        )}
 
+        {telaAtual === 'configuracoes' && (
+          <Configuracoes usuarioLogado={usuarioLogado} />
+        )}
+
+        {telaAtual === 'notificacoes' && (
+          <Notificacoes notificacoes={notificacoes} setNotificacoes={setNotificacoes} />
+        )}
         
-        {/* PLACEHOLDERS APENAS UMA VEZ */}
         {[''].includes(telaAtual) && (
           <div style={{ padding: '30px', color: '#fff' }}>
             <h1 className="fonte-quadrada" style={{ color: '#ff003c', fontSize: '2.5rem' }}>{telaAtual.replace('_', ' ').toUpperCase()}</h1>
@@ -207,17 +287,15 @@ function App() {
 
       </main>
 
-    
       {showModal && (
-        <ModalCriarEvento 
-          fecharModal={() => setShowModal(false)} 
-          onEventoCriado={() => {
-            carregarEventos(); // Atualiza a lista na tela
-            setTelaAtual('eventos'); // Opcional: Joga a pessoa pra tela de eventos pra ela ver o que criou
-          }} 
-        />
-      )}
+  <ModalCriarEvento 
+    fecharModal={() => { setShowModal(false); setEventoSendoEditado(null); }} 
+    onEventoCriado={carregarEventos} 
+    eventoSendoEditado={eventoSendoEditado} 
+  />
+)}
     </div>
   )
 }
+
 export default App;

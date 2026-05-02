@@ -18,17 +18,18 @@ console.log("TODOS OS EVENTOS QUE CHEGARAM AQUI:", eventos);
 
   
 const eventosLineup = (eventos || []).filter(e => {
-    const meuVulgo = String(usuarioLogado?.vulgo || '').trim().toLowerCase();
-    const titulo = String(e.titulo || '').toLowerCase();
-    const lineUp = String(e.lista_artistas || e.programacao || '').toLowerCase(); 
-    
+    const meuVulgo = String(usuarioLogado?.vulgo || '').trim();
     if (!meuVulgo) return false; 
     
-    const taNoTitulo = titulo.includes(meuVulgo);
-    const taNoLine = lineUp.includes(meuVulgo);
+    // Regex para buscar a palavra exata, ignorando maiúsculas e minúsculas ('i')
+    const regexPalavraExata = new RegExp(`\\b${meuVulgo}\\b`, 'i');
 
-    // Tirei o console.log e a trava do !isProdutor. 
-    // Agora, se seu nome tá no line, aparece na aba, independente de quem criou.
+    const titulo = String(e.titulo || '');
+    const lineUp = String(e.lista_artistas || e.programacao || ''); 
+    
+    const taNoTitulo = regexPalavraExata.test(titulo);
+    const taNoLine = regexPalavraExata.test(lineUp);
+
     return (taNoTitulo || taNoLine);
   });
   
@@ -250,7 +251,7 @@ const eventosLineup = (eventos || []).filter(e => {
         <button className="fonte-quadrada" style={{ background: 'transparent', color: '#fff', border: '1px solid #fff', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer' }}>
           SOLICITAR PERFIL PRODUTOR
         </button>
-      </div>
+      </div> 
     ) : (
       /* CASO 2: O cara É produtor, mas ainda não criou nada */
       eventosProdutor.length === 0 ? (
