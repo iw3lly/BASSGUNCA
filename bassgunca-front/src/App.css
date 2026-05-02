@@ -19,29 +19,20 @@
   padding: 0;
 }
 html, body, #root {
-  width: 100vw;
+  width: 100%; /* Mudamos de 100vw para 100% */
   min-height: 100vh;
-  
-  /* Mantemos o degradê para o fundo não ficar cinza, mas sim um preto profundo */
+  /* O restante do seu fundo continua igual... */
   background-image: 
     linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)), 
     url('./assets/logo.png'); 
-
-  /* AJUSTE AQUI: O tamanho da imagem (tenta 300px ou 250px se quiser menor ainda) */
   background-size: 300px auto; 
-
-  /* Centraliza a imagem no meio da tela */
   background-position: center; 
-
-  /* Garante que ela não vai se repetir como estampa */
   background-repeat: no-repeat; 
-
-  /* Faz a imagem ficar fixa enquanto os cards deslizam por cima */
   background-attachment: fixed; 
-
   background-color: var(--preto-absoluto);
   color: var(--branco-puro);
-  overflow-x: hidden;
+  
+  /* REMOVEMOS o overflow-x: hidden daqui, ele mata o sticky */
 }
 
 .fonte-quadrada { font-family: 'Teko', sans-serif; letter-spacing: 1px; font-weight: 600; }
@@ -54,21 +45,21 @@ html, body, #root {
   display: flex; 
   width: 100%;
   min-height: 100vh;
-  align-items: flex-start; 
+  /* align-items: flex-start;  <-- Mantenha isso, é vital! */
 }
 
 .sidebar { 
-  width: 260px; /* Um pouco mais largo pra respirar os botões */
+  width: 260px;
   min-width: 260px;
-  height: 100vh; 
+  height: 100vh; /* Altura da tela */
   background: #000; 
   border-right: 2px solid #111; 
   padding: 30px 20px; 
   display: flex; 
   flex-direction: column; 
-  position: sticky; /* Trava o menu na tela quando der scroll */
+  position: sticky; 
   top: 0;
-  z-index: 10;
+  z-index: 100; /* Aumentei um pouco o z-index pra segurança */
 }
 
 .main-content { 
@@ -76,10 +67,9 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: calc(100vw - 260px); 
-  overflow-x: hidden; 
+  /* Remova o max-width: calc(...) se puder, ou use width: 0; flex-grow: 1; */
+  overflow: visible; /* Garante que o scroll do body seja usado */
 }
-
 /* =========================================
    3. COMPONENTES DE NAVEGAÇÃO E HEADER
    ========================================= */
