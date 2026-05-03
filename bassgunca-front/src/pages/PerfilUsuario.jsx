@@ -66,16 +66,29 @@ function PerfilUsuario({ perfil, eventos, onVoltar, usuarioLogado }) {
             <p className="fonte-texto" style={{ color: '#ccc', fontSize: '0.95rem', lineHeight: '1.4', margin: '0 0 15px 0', maxWidth: '500px' }}>{perfil.bio}</p>
 
             {/* LINKS SOCIAIS */}
-            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                {perfil.redes_sociais && Object.entries(perfil.redes_sociais).map(([rede, link]) => {
-                  if (!link) return null;
-                  return (
-                    <a key={rede} href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noreferrer" className="fonte-texto" style={{ color: '#fff', textDecoration: 'none', fontSize: '0.8rem', borderBottom: '1px solid #333', paddingBottom: '2px', opacity: 0.7 }}>
-                      {rede.toUpperCase()}
-                    </a>
-                  );
-                })}
-            </div>
+         {/* APAGUE O CÓDIGO ANTIGO DAS REDES SOCIAIS E COLE ESTE: */}
+          <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+            {perfil?.link_instagram && (
+              <a href={perfil.link_instagram} target="_blank" rel="noreferrer" style={{ color: '#888', transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#ff003c'} onMouseLeave={e => e.currentTarget.style.color = '#888'}>
+                <FaInstagram size={26} />
+              </a>
+            )}
+            {perfil?.link_soundcloud && (
+              <a href={perfil.link_soundcloud} target="_blank" rel="noreferrer" style={{ color: '#888', transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#ff003c'} onMouseLeave={e => e.currentTarget.style.color = '#888'}>
+                <FaSoundcloud size={26} />
+              </a>
+            )}
+            {perfil?.link_spotify && (
+              <a href={perfil.link_spotify} target="_blank" rel="noreferrer" style={{ color: '#888', transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#1DB954'} onMouseLeave={e => e.currentTarget.style.color = '#888'}>
+                <FaSpotify size={26} />
+              </a>
+            )}
+            {perfil?.link_geral && (
+              <a href={perfil.link_geral} target="_blank" rel="noreferrer" style={{ color: '#888', transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.color = '#ff003c'} onMouseLeave={e => e.currentTarget.style.color = '#888'}>
+                <SiLinktree size={24} />
+              </a>
+            )}
+          </div>
           </div>
         </div>
 

@@ -11,8 +11,8 @@ function MeusEventos({ eventos, usuarioLogado, setEventos }) {
   });
 
   // 2. Verificar permissões
-  const temPermissaoProdutor = usuarioLogado?.funcao?.toUpperCase().includes('PRODUTOR') || 
-                               usuarioLogado?.funcao?.toUpperCase().includes('EVENTO');
+  const temPermissaoProdutor = usuarioLogado?.funcoes?.toUpperCase().includes('PRODUTOR') || 
+                               usuarioLogado?.funcoes?.toUpperCase().includes('EVENTO');
 
  // 3. Função de salvar
 const handleSalvar = async (e) => {

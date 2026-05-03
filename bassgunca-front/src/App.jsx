@@ -129,23 +129,27 @@ function App() {
 
   // LOGIN (COM GERAÇÃO DE SESSÃO E NOTIFICAÇÃO DE BOAS-VINDAS)
   const handleLoginSuccess = (usuario) => { 
-    setUsuarioLogado(usuario); 
-    
+    // 1. Prepara a sessão para o localStorage
     const session = {
       usuario: usuario,
-      expiresAt: Date.now() + (12 * 60 * 60 * 1000)
+      expiresAt: Date.now() + (12 * 60 * 60 * 1000) // 12 horas
     };
     localStorage.setItem('@bassgunca:user_session', JSON.stringify(session)); 
 
+    // 2. Atualiza o estado das notificações com segurança (fallback 'USUÁRIO')
+    const nomeExibicao = (usuario.vulgo || usuario.nome || 'USUÁRIO').toUpperCase();
+    
     setNotificacoes([{ 
       id: Date.now(), 
       tipo: 'sistema', 
       lida: false, 
-      texto: `SISTEMA: Salve ${(usuario.vulgo || usuario.nome).toUpperCase()}! Acesso VIP confirmado.`, 
+      texto: `SISTEMA: Salve ${nomeExibicao}! Acesso VIP confirmado.`, 
       tempo: 'Agora mesmo' 
     }]);
-  }
-  
+
+    // 3. 🔥 Atualiza o estado do usuário POR ÚLTIMO para garantir a troca de tela sem erro
+    setUsuarioLogado(usuario); 
+  };
   // LOGOUT
   const handleSair = () => { 
     setUsuarioLogado(null); 

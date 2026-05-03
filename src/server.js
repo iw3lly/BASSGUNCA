@@ -130,7 +130,7 @@ app.put('/api/usuarios/:id', async (req, res) => {
 
     const query = `
       UPDATE usuarios SET 
-      nome = ?, vulgo = ?, data_nascimento = ?, funcao = ?, bio = ?, foto_perfil = ?, redes_sociais = ?
+      nome = ?, vulgo = ?, data_nascimento = ?, funcoes = ?, bio = ?, foto_perfil = ?, redes_sociais = ?
       WHERE id = ?
     `;
 
