@@ -1,4 +1,3 @@
-
 .login-container {
   display: flex;
   justify-content: center;
@@ -7,7 +6,11 @@
   width: 100vw;
   padding: 10px;
   box-sizing: border-box;
-  background: radial-gradient(circle at center, rgba(30,0,0,0.5) 0%, rgba(0,0,0,1) 100%);
+  background: radial-gradient(
+    circle at center,
+    rgba(30, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
 }
 
 .login-box {
@@ -19,19 +22,22 @@
   width: 100%;
   max-width: 400px; /* Caixa mais estreita */
   position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 .login-box::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 3px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
   background-color: var(--vermelho-neon);
   border-radius: 4px 4px 0 0;
 }
 
 .login-box img {
-  filter: drop-shadow(0 0 10px rgba(255,0,60,0.5));
+  filter: drop-shadow(0 0 10px rgba(255, 0, 60, 0.5));
   width: 100px !important; /* Logo menor */
   margin-bottom: 5px !important;
 }
@@ -58,7 +64,7 @@
   border-radius: 4px;
   font-size: 0.9rem;
   transition: all 0.2s ease;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 .input-bruto:focus {
@@ -73,7 +79,7 @@
   color: var(--branco-puro);
   border: none;
   padding: 12px; /* Botão mais fino */
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   font-size: 1.1rem;
   letter-spacing: 2px;
   border-radius: 4px;
@@ -81,7 +87,6 @@
   text-transform: uppercase;
   margin-top: 5px;
 }
-
 
 .btn-acao:hover {
   background-color: #d60033;
@@ -116,14 +121,20 @@
   width: 100%;
 }
 
-.card-funcao-label { cursor: pointer; position: relative; display: flex; }
-.card-funcao-checkbox { display: none; }
+.card-funcao-label {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+}
+.card-funcao-checkbox {
+  display: none;
+}
 
 .card-funcao-box {
   background-color: rgba(10, 10, 10, 0.8);
   border: 1px solid #222;
   border-radius: 4px;
-  padding: 8px 4px; 
+  padding: 8px 4px;
   text-align: center;
   width: 100%;
   display: flex;
@@ -131,19 +142,25 @@
   align-items: center;
 }
 
-.card-funcao-icone { color: var(--roxo-cena); margin-bottom: 3px; }
-.card-funcao-icone svg { width: 18px; height: 18px; }
+.card-funcao-icone {
+  color: var(--roxo-cena);
+  margin-bottom: 3px;
+}
+.card-funcao-icone svg {
+  width: 18px;
+  height: 18px;
+}
 
 .card-funcao-titulo {
   color: var(--branco-puro);
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   font-size: 0.75rem;
   margin-bottom: 2px;
 }
 
 .card-funcao-desc {
   color: var(--cinza-texto);
-  font-size: 0.5rem; 
+  font-size: 0.5rem;
   line-height: 1.1;
   margin: 0;
 }
@@ -153,18 +170,33 @@
   background-color: rgba(20, 0, 0, 0.5);
 }
 
-.card-funcao-checkbox:checked + .card-funcao-box .card-funcao-icone { color: var(--vermelho-neon); }
+.card-funcao-checkbox:checked + .card-funcao-box .card-funcao-icone {
+  color: var(--vermelho-neon);
+}
 
 .card-funcao-checkbox:checked + .card-funcao-box::after {
-  content: '✓'; position: absolute; top: -5px; right: -5px;
-  background-color: var(--vermelho-neon); color: white;
-  width: 14px; height: 14px; border-radius: 50%; font-size: 9px;
-  display: flex; align-items: center; justify-content: center;
+  content: "✓";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--vermelho-neon);
+  color: white;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (max-width: 450px) {
-  .funcoes-grid { grid-template-columns: repeat(2, 1fr); }
-  .card-funcao-label:last-child { grid-column: span 2; }
+  .funcoes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card-funcao-label:last-child {
+    grid-column: span 2;
+  }
 }
 .link-toggle {
   color: var(--vermelho-neon);
@@ -175,8 +207,8 @@
 }
 
 .link-toggle:hover {
-  color: #ff3366; 
+  color: #ff3366;
   text-decoration: underline;
-  transform: scale(1.02); 
-  text-shadow: 0 0 10px rgba(255, 0, 60, 0.6); 
+  transform: scale(1.02);
+  text-shadow: 0 0 10px rgba(255, 0, 60, 0.6);
 }

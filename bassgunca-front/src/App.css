@@ -2,13 +2,13 @@
    1. VARIÁVEIS E RESET GLOBAL (A MÁGICA DA TELA CHEIA)
    ========================================= */
 :root {
---preto-absoluto: #0a0a0a;
+  --preto-absoluto: #0a0a0a;
   /* Painéis agora são levemente transparentes para mostrar o fundo */
-  --preto-painel: rgba(10, 10, 10, 0.85); 
+  --preto-painel: rgba(10, 10, 10, 0.85);
   --cinza-sujo: #444;
   --cinza-texto: #888;
   --branco-puro: #ffffff;
-  --vermelho-neon: #ff003c; 
+  --vermelho-neon: #ff003c;
   --roxo-cena: #8a2be2;
   --amarelo-alerta: #ffcc00;
 }
@@ -18,52 +18,61 @@
   margin: 0;
   padding: 0;
 }
-html, body, #root {
+html,
+body,
+#root {
   width: 100%; /* Mudamos de 100vw para 100% */
   min-height: 100vh;
   /* O restante do seu fundo continua igual... */
-  background-image: 
-    linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)), 
-    url('./assets/logo.png'); 
-  background-size: 300px auto; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  background-attachment: fixed; 
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 0.85)),
+    url("./assets/logo.png");
+  background-size: 300px auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   background-color: var(--preto-absoluto);
   color: var(--branco-puro);
-  
+
   /* REMOVEMOS o overflow-x: hidden daqui, ele mata o sticky */
 }
 
-.fonte-quadrada { font-family: 'Teko', sans-serif; letter-spacing: 1px; font-weight: 600; }
-.fonte-texto { font-family: 'Chakra Petch', sans-serif; font-weight: 500; }
+.fonte-quadrada {
+  font-family: "Teko", sans-serif;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.fonte-texto {
+  font-family: "Chakra Petch", sans-serif;
+  font-weight: 500;
+}
 
 /* =========================================
    2. O ESQUELETO MESTRE (O "SHOPPING")
    ========================================= */
-.dashboard-container { 
-  display: flex; 
+.dashboard-container {
+  display: flex;
   width: 100%;
   min-height: 100vh;
   /* align-items: flex-start;  <-- Mantenha isso, é vital! */
 }
 
-.sidebar { 
+.sidebar {
   width: 260px;
   min-width: 260px;
   height: 100vh; /* Altura da tela */
-  background: #000; 
-  border-right: 2px solid #111; 
-  padding: 30px 20px; 
-  display: flex; 
-  flex-direction: column; 
-  position: sticky; 
+  background: #000;
+  border-right: 2px solid #111;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
   top: 0;
   z-index: 100; /* Aumentei um pouco o z-index pra segurança */
 }
 
-.main-content { 
-  flex: 1; 
+.main-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -73,71 +82,222 @@ html, body, #root {
 /* =========================================
    3. COMPONENTES DE NAVEGAÇÃO E HEADER
    ========================================= */
-.logo-img-side { width: 100px; margin-bottom: 40px; align-self: center; }
-.menu-nav { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-.menu-item { padding: 12px 15px; font-size: 1.3rem; cursor: pointer; color: #666; transition: 0.2s; border-radius: 4px; }
-.menu-item:hover, .menu-item.ativo { color: #fff; background: var(--vermelho-neon); padding-left: 20px; }
+.logo-img-side {
+  width: 100px;
+  margin-bottom: 40px;
+  align-self: center;
+}
+.menu-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.menu-item {
+  padding: 12px 15px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: #666;
+  transition: 0.2s;
+  border-radius: 4px;
+}
+.menu-item:hover,
+.menu-item.ativo {
+  color: #fff;
+  background: var(--vermelho-neon);
+  padding-left: 20px;
+}
 
-.btn-sair { background: none; border: 1px solid var(--vermelho-neon); color: var(--vermelho-neon); padding: 10px; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
-.btn-sair:hover { background: var(--vermelho-neon); color: #fff; }
+.btn-sair {
+  background: none;
+  border: 1px solid var(--vermelho-neon);
+  color: var(--vermelho-neon);
+  padding: 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: 0.2s;
+}
+.btn-sair:hover {
+  background: var(--vermelho-neon);
+  color: #fff;
+}
 
-.dash-header { display: flex; justify-content: space-between; align-items: center; padding: 30px 50px; background-color: var(--preto-absoluto); border-bottom: 1px solid #111; }
-.dash-header h1 { font-size: 2.5rem; margin: 0; }
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 50px;
+  background-color: var(--preto-absoluto);
+  border-bottom: 1px solid #111;
+}
+.dash-header h1 {
+  font-size: 2.5rem;
+  margin: 0;
+}
 
-.btn-destaque { background: var(--vermelho-neon); color: #fff; border: none; padding: 10px 25px; cursor: pointer; font-size: 1.5rem; border-radius: 2px; transition: 0.2s; }
-.btn-destaque:hover { background: #d60033; transform: scale(1.02); }
+.btn-destaque {
+  background: var(--vermelho-neon);
+  color: #fff;
+  border: none;
+  padding: 10px 25px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  border-radius: 2px;
+  transition: 0.2s;
+}
+.btn-destaque:hover {
+  background: #d60033;
+  transform: scale(1.02);
+}
 
 /* =========================================
    4. CARDS, EVENTOS E FEED (O SEU DESIGN ORIGINAL)
    ========================================= */
-.stats-row { display: flex; gap: 20px; margin-bottom: 30px; }
-.stat-card { flex: 1; background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; border-radius: 4px; }
-.stat-card.red { border-left: 5px solid var(--vermelho-neon); }
-.stat-card.purple { border-left: 5px solid var(--roxo-cena); }
-.stat-card h2 { margin: 0; font-size: 3.5rem; line-height: 1; }
-.stat-card span { color: #777; font-size: 1.2rem; }
+.stats-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.stat-card {
+  flex: 1;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  padding: 20px;
+  border-radius: 4px;
+}
+.stat-card.red {
+  border-left: 5px solid var(--vermelho-neon);
+}
+.stat-card.purple {
+  border-left: 5px solid var(--roxo-cena);
+}
+.stat-card h2 {
+  margin: 0;
+  font-size: 3.5rem;
+  line-height: 1;
+}
+.stat-card span {
+  color: #777;
+  font-size: 1.2rem;
+}
 
-.content-split { display: grid; grid-template-columns: 1fr 350px; gap: 30px; }
-.section-title { font-size: 1.8rem; margin-bottom: 20px; color: #fff; border-bottom: 2px solid #111; padding-bottom: 10px; }
+.content-split {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 30px;
+}
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #fff;
+  border-bottom: 2px solid #111;
+  padding-bottom: 10px;
+}
 
-.event-strip { background: #0d0d0d; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #151515; border-left: 3px solid var(--vermelho-neon); }
-.event-info span { display: block; margin-bottom: 5px; }
-.event-info small { color: #888; font-size: 0.85rem; }
-.event-date { font-size: 1.5rem; color: #aaa; }
+.event-strip {
+  background: #0d0d0d;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #151515;
+  border-left: 3px solid var(--vermelho-neon);
+}
+.event-info span {
+  display: block;
+  margin-bottom: 5px;
+}
+.event-info small {
+  color: #888;
+  font-size: 0.85rem;
+}
+.event-date {
+  font-size: 1.5rem;
+  color: #aaa;
+}
 
-.feed-section { background: #080808; padding: 20px; border: 1px solid #111; }
-.feed-input { display: flex; gap: 10px; margin-bottom: 20px; }
-.feed-input input { flex: 1; background: #111; border: 1px solid #222; color: #fff; padding: 12px; font-size: 0.9rem; }
-.feed-input button { background: #fff; color: #000; border: none; padding: 0 20px; cursor: pointer; font-size: 1.2rem; }
-.feed-item { border-bottom: 1px solid #151515; padding: 12px 0; }
-.feed-item p { margin: 5px 0 0; font-size: 0.9rem; color: #aaa; }
+.feed-section {
+  background: #080808;
+  padding: 20px;
+  border: 1px solid #111;
+}
+.feed-input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.feed-input input {
+  flex: 1;
+  background: #111;
+  border: 1px solid #222;
+  color: #fff;
+  padding: 12px;
+  font-size: 0.9rem;
+}
+.feed-input button {
+  background: #fff;
+  color: #000;
+  border: none;
+  padding: 0 20px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.feed-item {
+  border-bottom: 1px solid #151515;
+  padding: 12px 0;
+}
+.feed-item p {
+  margin: 5px 0 0;
+  font-size: 0.9rem;
+  color: #aaa;
+}
 
 /* =========================================
    5. MODAL, SCROLLBARS ESTILIZADAS E CARROSSEL
    ========================================= */
-.modal-overlay { 
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-  background: rgba(0,0,0,0.85); 
-  display: flex; justify-content: center; align-items: center; 
-  z-index: 9999; 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
-.modal-box { 
-  background: #0a0a0a; border: 1px solid var(--vermelho-neon); 
-  padding: 30px; width: 90%; max-width: 400px; 
-  border-radius: 4px; box-shadow: 0 10px 40px rgba(255,0,60,0.2); 
+.modal-box {
+  background: #0a0a0a;
+  border: 1px solid var(--vermelho-neon);
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 4px;
+  box-shadow: 0 10px 40px rgba(255, 0, 60, 0.2);
 }
 
-.feed-list { 
-  max-height: 350px; 
-  overflow-y: auto;  
-  padding-right: 10px; 
+.feed-list {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 /* A sua scrollbar customizada */
-.feed-list::-webkit-scrollbar { width: 6px; }
-.feed-list::-webkit-scrollbar-track { background: #0a0a0a; }
-.feed-list::-webkit-scrollbar-thumb { background: var(--vermelho-neon); border-radius: 10px; }
-.feed-list::-webkit-scrollbar-thumb:hover { background: #d60033; }
+.feed-list::-webkit-scrollbar {
+  width: 6px;
+}
+.feed-list::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+.feed-list::-webkit-scrollbar-thumb {
+  background: var(--vermelho-neon);
+  border-radius: 10px;
+}
+.feed-list::-webkit-scrollbar-thumb:hover {
+  background: #d60033;
+}
 
 /* Oculta a barra de rolagem nos carrosséis da Home pra ficar liso igual app */
 .hide-scroll::-webkit-scrollbar {
@@ -146,7 +306,9 @@ html, body, #root {
 
 /* Container do Card para o efeito de escala */
 .card-container-home {
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
+  transition:
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    filter 0.3s;
   cursor: pointer;
 }
 

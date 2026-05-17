@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const Configuracoes = ({ usuarioLogado }) => {
   // Estados para simular as configurações na tela
-  const [senhaAtual, setSenhaAtual] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+  const [senhaAtual, setSenhaAtual] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
 
   // Estados dos novos módulos (Simulação para o Front-end)
   const [radarLineup, setRadarLineup] = useState(true);
@@ -15,133 +15,309 @@ const Configuracoes = ({ usuarioLogado }) => {
   const handleAlterarSenha = async (e) => {
     e.preventDefault();
     if (novaSenha !== confirmarSenha) {
-      setMensagem({ tipo: 'erro', texto: 'ERRO: AS SENHAS NÃO CONFEREM.' });
+      setMensagem({ tipo: "erro", texto: "ERRO: AS SENHAS NÃO CONFEREM." });
       return;
     }
     if (!senhaAtual || !novaSenha) {
-      setMensagem({ tipo: 'erro', texto: 'ERRO: PARÂMETROS AUSENTES.' });
+      setMensagem({ tipo: "erro", texto: "ERRO: PARÂMETROS AUSENTES." });
       return;
     }
-    setMensagem({ tipo: 'sucesso', texto: 'SISTEMA: CREDENCIAIS ATUALIZADAS COM SUCESSO.' });
-    setSenhaAtual(''); setNovaSenha(''); setConfirmarSenha('');
-    setTimeout(() => setMensagem({ tipo: '', texto: '' }), 4000);
+    setMensagem({
+      tipo: "sucesso",
+      texto: "SISTEMA: CREDENCIAIS ATUALIZADAS COM SUCESSO.",
+    });
+    setSenhaAtual("");
+    setNovaSenha("");
+    setConfirmarSenha("");
+    setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
   };
 
   const handleExcluirConta = () => {
-    const confirmar = window.confirm("!!! ALERTA DO SISTEMA !!!\n\nA exclusão é irreversível. Todos os seus dados na cena serão apagados. Prosseguir?");
-    if (confirmar) alert("Acesso negado: Função bloqueada para a apresentação.");
+    const confirmar = window.confirm(
+      "!!! ALERTA DO SISTEMA !!!\n\nA exclusão é irreversível. Todos os seus dados na cena serão apagados. Prosseguir?",
+    );
+    if (confirmar)
+      alert("Acesso negado: Função bloqueada para a apresentação.");
   };
 
-  if (!usuarioLogado) return <div style={{ color: '#fff', padding: '20px' }}>Carregando módulos...</div>;
+  if (!usuarioLogado)
+    return (
+      <div style={{ color: "#fff", padding: "20px" }}>
+        Carregando módulos...
+      </div>
+    );
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto', color: '#fff', minHeight: '80vh', paddingBottom: '100px' }}>
-      
+    <div
+      style={{
+        padding: "40px 20px",
+        maxWidth: "900px",
+        margin: "0 auto",
+        color: "#fff",
+        minHeight: "80vh",
+        paddingBottom: "100px",
+      }}
+    >
       {/* CABEÇALHO ESTILO TERMINAL */}
-      <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px dashed #333', paddingBottom: '20px', flexWrap: 'wrap', gap: '20px' }}>
+      <div
+        style={{
+          marginBottom: "40px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          borderBottom: "2px dashed #333",
+          paddingBottom: "20px",
+          flexWrap: "wrap",
+          gap: "20px",
+        }}
+      >
         <div>
-          <h1 className="fonte-quadrada" style={{ fontSize: '3rem', color: '#fff', margin: 0, letterSpacing: '-2px' }}>
-            <span style={{ color: '#ff003c' }}>SYS</span>.CONFIG
+          <h1
+            className="fonte-quadrada"
+            style={{
+              fontSize: "3rem",
+              color: "#fff",
+              margin: 0,
+              letterSpacing: "-2px",
+            }}
+          >
+            <span style={{ color: "#ff003c" }}>SYS</span>.CONFIG
           </h1>
-          <p className="fonte-texto" style={{ color: '#666', marginTop: '5px', fontFamily: 'monospace', textTransform: 'uppercase' }}>
+          <p
+            className="fonte-texto"
+            style={{
+              color: "#666",
+              marginTop: "5px",
+              fontFamily: "monospace",
+              textTransform: "uppercase",
+            }}
+          >
             Módulos do Sistema e Preferências
           </p>
         </div>
-        <div style={{ textAlign: 'right', fontFamily: 'monospace', fontSize: '0.85rem' }}>
-          <div style={{ color: '#00ff00', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
-            <div style={{ width: '8px', height: '8px', background: '#00ff00', borderRadius: '50%', boxShadow: '0 0 8px #00ff00' }}></div>
+        <div
+          style={{
+            textAlign: "right",
+            fontFamily: "monospace",
+            fontSize: "0.85rem",
+          }}
+        >
+          <div
+            style={{
+              color: "#00ff00",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              justifyContent: "flex-end",
+            }}
+          >
+            <div
+              style={{
+                width: "8px",
+                height: "8px",
+                background: "#00ff00",
+                borderRadius: "50%",
+                boxShadow: "0 0 8px #00ff00",
+              }}
+            ></div>
             STATUS: ONLINE
           </div>
-          <div style={{ color: '#666', marginTop: '5px' }}>ID DE OPERAÇÃO: #{usuarioLogado.id || '0000'}</div>
+          <div style={{ color: "#666", marginTop: "5px" }}>
+            ID DE OPERAÇÃO: #{usuarioLogado.id || "0000"}
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px' }}>
-        
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "40px" }}>
         {/* BLOCO 1: SEGURANÇA */}
         <section className="bloco-config">
           <h2 className="titulo-bloco">
             <span className="tag-numero">01</span> CRIPTOGRAFIA E ACESSO
           </h2>
-          <form onSubmit={handleAlterarSenha} style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <form
+            onSubmit={handleAlterarSenha}
+            style={{ display: "flex", flexDirection: "column", gap: "25px" }}
+          >
             <div className="caixa-input">
               <label>CHAVE DE ACESSO ATUAL</label>
-              <input type="password" placeholder="••••••••" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={senhaAtual}
+                onChange={(e) => setSenhaAtual(e.target.value)}
+              />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }} className="caixa-input">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "20px",
+              }}
+              className="caixa-input"
+            >
               <div>
                 <label>NOVA CHAVE</label>
-                <input type="password" placeholder="••••••••" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={novaSenha}
+                  onChange={(e) => setNovaSenha(e.target.value)}
+                />
               </div>
               <div>
                 <label>CONFIRMAR NOVA CHAVE</label>
-                <input type="password" placeholder="••••••••" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                />
               </div>
             </div>
-            <button type="submit" className="btn-override">SOBRESCREVER DADOS</button>
+            <button type="submit" className="btn-override">
+              SOBRESCREVER DADOS
+            </button>
           </form>
           {mensagem.texto && (
-            <div style={{ marginTop: '25px', padding: '15px', background: '#000', borderLeft: `4px solid ${mensagem.tipo === 'sucesso' ? '#00ff00' : '#ff003c'}`, color: mensagem.tipo === 'sucesso' ? '#00ff00' : '#ff003c', fontFamily: 'monospace', fontSize: '0.9rem' }}>
+            <div
+              style={{
+                marginTop: "25px",
+                padding: "15px",
+                background: "#000",
+                borderLeft: `4px solid ${mensagem.tipo === "sucesso" ? "#00ff00" : "#ff003c"}`,
+                color: mensagem.tipo === "sucesso" ? "#00ff00" : "#ff003c",
+                fontFamily: "monospace",
+                fontSize: "0.9rem",
+              }}
+            >
               {mensagem.texto}
             </div>
           )}
         </section>
 
         {/* BLOCO 2: PRIVACIDADE E RADAR (NOVO) */}
-        <section className="bloco-config" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', padding: '0', background: 'transparent', border: 'none' }}>
-          
+        <section
+          className="bloco-config"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "30px",
+            padding: "0",
+            background: "transparent",
+            border: "none",
+          }}
+        >
           {/* Sub-bloco: Privacidade */}
           <div className="bloco-config" style={{ margin: 0 }}>
-            <h2 className="titulo-bloco"><span className="tag-numero">02</span> PRIVACIDADE</h2>
-            
+            <h2 className="titulo-bloco">
+              <span className="tag-numero">02</span> PRIVACIDADE
+            </h2>
+
             <div className="item-toggle">
               <div>
-                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>MODO FANTASMA</p>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>Ocultar seus eventos favoritados do perfil público.</p>
+                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
+                  MODO FANTASMA
+                </p>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
+                  Ocultar seus eventos favoritados do perfil público.
+                </p>
               </div>
-              <button onClick={() => setModoFantasma(!modoFantasma)} className={`btn-toggle ${modoFantasma ? 'on' : 'off'}`}>
-                {modoFantasma ? '[ ON ]' : '[ OFF ]'}
+              <button
+                onClick={() => setModoFantasma(!modoFantasma)}
+                className={`btn-toggle ${modoFantasma ? "on" : "off"}`}
+              >
+                {modoFantasma ? "[ ON ]" : "[ OFF ]"}
               </button>
             </div>
           </div>
 
           {/* Sub-bloco: Notificações */}
           <div className="bloco-config" style={{ margin: 0 }}>
-            <h2 className="titulo-bloco"><span className="tag-numero">03</span> RADAR / ALARMES</h2>
-            
-            <div className="item-toggle" style={{ borderBottom: '1px solid #1a1a1a', paddingBottom: '15px', marginBottom: '15px' }}>
+            <h2 className="titulo-bloco">
+              <span className="tag-numero">03</span> RADAR / ALARMES
+            </h2>
+
+            <div
+              className="item-toggle"
+              style={{
+                borderBottom: "1px solid #1a1a1a",
+                paddingBottom: "15px",
+                marginBottom: "15px",
+              }}
+            >
               <div>
-                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>ALERTA DE LINE-UP</p>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>Avisar quando marcarem seu vulgo em um evento.</p>
+                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
+                  ALERTA DE LINE-UP
+                </p>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
+                  Avisar quando marcarem seu vulgo em um evento.
+                </p>
               </div>
-              <button onClick={() => setRadarLineup(!radarLineup)} className={`btn-toggle ${radarLineup ? 'on' : 'off'}`}>
-                {radarLineup ? '[ ON ]' : '[ OFF ]'}
+              <button
+                onClick={() => setRadarLineup(!radarLineup)}
+                className={`btn-toggle ${radarLineup ? "on" : "off"}`}
+              >
+                {radarLineup ? "[ ON ]" : "[ OFF ]"}
               </button>
             </div>
 
             <div className="item-toggle">
               <div>
-                <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>RADAR DE EVENTOS</p>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>Receber lembrete 24h antes dos eventos de interesse.</p>
+                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
+                  RADAR DE EVENTOS
+                </p>
+                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
+                  Receber lembrete 24h antes dos eventos de interesse.
+                </p>
               </div>
-              <button onClick={() => setRadarEventos(!radarEventos)} className={`btn-toggle ${radarEventos ? 'on' : 'off'}`}>
-                {radarEventos ? '[ ON ]' : '[ OFF ]'}
+              <button
+                onClick={() => setRadarEventos(!radarEventos)}
+                className={`btn-toggle ${radarEventos ? "on" : "off"}`}
+              >
+                {radarEventos ? "[ ON ]" : "[ OFF ]"}
               </button>
             </div>
           </div>
-
         </section>
 
         {/* BLOCO 4: ZONA DE PERIGO */}
         <section className="bloco-config hazard-zone">
           <div className="hazard-tape"></div>
-          <h2 className="titulo-bloco" style={{ color: '#ff003c' }}><span className="tag-numero hazard">!</span> ZONA CRÍTICA</h2>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-            <div style={{ flex: '1', minWidth: '250px' }}>
-              <p className="fonte-texto" style={{ color: '#aaa', margin: '0 0 10px 0' }}>A exclusão apagará permanentemente seu histórico e presença em line-ups.</p>
-              <p className="fonte-texto" style={{ color: '#ff003c', margin: 0, fontWeight: 'bold', fontSize: '0.85rem' }}>ESTA AÇÃO NÃO PODE SER DESFEITA.</p>
+          <h2 className="titulo-bloco" style={{ color: "#ff003c" }}>
+            <span className="tag-numero hazard">!</span> ZONA CRÍTICA
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "20px",
+            }}
+          >
+            <div style={{ flex: "1", minWidth: "250px" }}>
+              <p
+                className="fonte-texto"
+                style={{ color: "#aaa", margin: "0 0 10px 0" }}
+              >
+                A exclusão apagará permanentemente seu histórico e presença em
+                line-ups.
+              </p>
+              <p
+                className="fonte-texto"
+                style={{
+                  color: "#ff003c",
+                  margin: 0,
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                }}
+              >
+                ESTA AÇÃO NÃO PODE SER DESFEITA.
+              </p>
             </div>
-            <button onClick={handleExcluirConta} className="btn-danger">PURGAR CONTA</button>
+            <button onClick={handleExcluirConta} className="btn-danger">
+              PURGAR CONTA
+            </button>
           </div>
         </section>
       </div>
