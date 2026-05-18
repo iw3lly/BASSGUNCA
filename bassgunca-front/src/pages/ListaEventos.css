@@ -1,0 +1,357 @@
+.eventos-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 0, 60, 0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 0, 60, 0.08),
+      transparent 35%
+    ),
+    #020202;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero-eventos {
+  position: relative;
+  padding: 120px 6vw 90px;
+  overflow: hidden;
+}
+
+.hero-eventos::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: #ff003c;
+  filter: blur(160px);
+  opacity: 0.12;
+  top: -250px;
+  right: -150px;
+  pointer-events: none;
+}
+
+.hero-eventos::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #ff003c;
+  filter: blur(140px);
+  opacity: 0.08;
+  bottom: -200px;
+  left: -150px;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-big {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+  padding: 22px 24px;
+  border-radius: 22px;
+  outline: none;
+  font-size: 1rem;
+  backdrop-filter: blur(18px);
+  transition: all 0.3s ease;
+  margin-bottom: 30px;
+}
+
+.search-big::placeholder {
+  color: #666;
+  letter-spacing: 1px;
+}
+
+.search-big:focus {
+  border-color: #ff003c;
+  box-shadow:
+    0 0 30px rgba(255, 0, 60, 0.25),
+    0 0 80px rgba(255, 0, 60, 0.08);
+}
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.filters-glass {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.filter-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  padding: 14px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: monospace;
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+  min-height: 50px;
+}
+
+.filter-pill:hover {
+  color: white;
+  border-color: #ff003c;
+  transform: translateY(-2px);
+}
+
+.filter-pill.active {
+  background: #ff003c;
+  color: white;
+  border-color: #ff003c;
+  box-shadow:
+    0 0 25px rgba(255, 0, 60, 0.4),
+    0 0 80px rgba(255, 0, 60, 0.15);
+}
+
+select.filter-pill {
+  appearance: none;
+  outline: none;
+}
+
+input.filter-pill {
+  outline: none;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.grid-eventos-premium {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+  padding: 0 6vw 120px;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card-premium {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(18px);
+
+  padding: 30px;
+
+  transition: all 0.35s ease;
+
+  display: flex;
+  flex-direction: column;
+
+  min-height: 360px;
+}
+.card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 0, 60, 0.14), transparent 35%);
+
+  opacity: 0;
+  transition: opacity 0.35s ease;
+
+  pointer-events: none;
+}
+
+.card-premium:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 0, 60, 0.5);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    0 0 50px rgba(255, 0, 60, 0.12);
+}
+
+.card-premium:hover::before {
+  opacity: 1;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+
+  font-family: monospace;
+
+  font-weight: bold;
+
+  letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.card-button-main {
+  flex: 1;
+
+  background: #ff003c;
+
+  border: none;
+
+  color: white;
+
+  padding: 15px;
+
+  border-radius: 16px;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+  transition: all 0.25s ease;
+
+  letter-spacing: 1px;
+}
+
+.card-button-main:hover {
+  transform: scale(1.02);
+
+  box-shadow:
+    0 0 25px rgba(255, 0, 60, 0.45),
+    0 0 60px rgba(255, 0, 60, 0.18);
+}
+
+.card-button-like {
+  width: 58px;
+
+  border-radius: 16px;
+
+  border: 1px solid #ff003c;
+
+  background: transparent;
+
+  color: #ff003c;
+
+  cursor: pointer;
+
+  font-size: 1.1rem;
+
+  transition: all 0.25s ease;
+}
+
+.card-button-like:hover {
+  transform: scale(1.05);
+
+  box-shadow: 0 0 20px rgba(255, 0, 60, 0.35);
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+  text-align: center;
+  padding: 120px 20px;
+}
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff003c;
+}
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 900px) {
+  .hero-eventos {
+    padding-top: 90px;
+    padding-bottom: 70px;
+  }
+
+  .grid-eventos-premium {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-glass {
+    flex-direction: column;
+  }
+
+  .filter-pill {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-content h1 {
+    font-size: 3rem !important;
+  }
+
+  .hero-content p {
+    font-size: 1rem !important;
+  }
+
+  .search-big {
+    padding: 18px;
+    font-size: 0.9rem;
+  }
+
+  .card-premium {
+    padding: 24px;
+    min-height: auto;
+  }
+
+  .grid-eventos-premium {
+    padding-bottom: 80px;
+  }
+}
