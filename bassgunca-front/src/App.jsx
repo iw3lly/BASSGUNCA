@@ -31,6 +31,9 @@ import { useSessao } from "./hooks/useSessao";
 import { useFeed } from "./hooks/useFeed";
 import { useEventos } from "./hooks/useEventos";
 
+import { Toaster } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+
 function App() {
   // =========================================
   // SESSÃO
@@ -148,7 +151,7 @@ function App() {
     ]);
 
     const session = {
-      usuario: usuario,
+      usuario,
       expiresAt: Date.now() + 12 * 60 * 60 * 1000,
     };
 
@@ -213,161 +216,212 @@ function App() {
   };
 
   // =========================================
-  // LOADING LOGIN
+  // LOGIN SCREEN
   // =========================================
   if (!usuarioLogado) {
     return <Login onLogin={handleLoginSuccess} />;
   }
 
   // =========================================
+  // ANIMAÇÃO
+  // =========================================
+  const pageAnimation = {
+    initial: { opacity: 0, y: 15 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -15 },
+    transition: { duration: 0.25 },
+  };
+
+  // =========================================
   // RENDER
   // =========================================
   return (
-    <div className="dashboard-container">
-      {/* SIDEBAR */}
-      <Sidebar
-        logoImg={logoImg}
-        telaAtual={telaAtual}
-        setTelaAtual={navegarPara}
-        voltarParaHome={() => navegarPara("home")}
-        handleSair={handleSair}
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#0a0a0a",
+            color: "#fff",
+            border: "1px solid #222",
+          },
+        }}
       />
 
-      {/* MAIN */}
-      <main className="main-content">
-        {/* HEADER */}
-        <Header
-          usuarioLogado={usuarioLogado}
-          setShowModal={setShowModal}
+      <div className="dashboard-container">
+        {/* SIDEBAR */}
+        <Sidebar
+          logoImg={logoImg}
+          telaAtual={telaAtual}
           setTelaAtual={navegarPara}
-          notificacoes={notificacoes}
-          voltarPagina={voltarPagina}
+          voltarParaHome={() => navegarPara("home")}
+          handleSair={handleSair}
         />
 
-        {/* HOME */}
-        {telaAtual === "home" && (
-          <Home
-            eventosAtivos={eventosAtivos}
-            abrirDetalheEvento={abrirDetalheEvento}
-            handleToggleInteresse={handleToggleInteresse}
+        {/* MAIN */}
+        <main className="main-content">
+          {/* HEADER */}
+          <Header
             usuarioLogado={usuarioLogado}
-            handlePostarFeed={handlePostarFeed}
-            novoPost={novoPost}
-            setNovoPost={setNovoPost}
-            feed={feed}
-            abrirPerfilUsuario={abrirPerfilUsuario}
+            setShowModal={setShowModal}
             setTelaAtual={navegarPara}
-          />
-        )}
-
-        {/* EVENTOS */}
-        {telaAtual === "eventos" && (
-          <ListaEventos
-            eventos={eventos}
-            abrirDetalheEvento={abrirDetalheEvento}
-            handleToggleInteresse={handleToggleInteresse}
-            usuarioLogado={usuarioLogado}
-          />
-        )}
-
-        {/* ARTISTAS */}
-        {telaAtual === "artistas" && (
-          <Artistas eventos={eventos} abrirPerfilUsuario={abrirPerfilUsuario} />
-        )}
-
-        {/* DETALHE EVENTO */}
-        {telaAtual === "detalhe_evento" && (
-          <DetalheEvento evento={eventoSelecionado} onVoltar={voltarPagina} />
-        )}
-
-        {/* PERFIL USUÁRIO */}
-        {telaAtual === "perfil_usuario" && (
-          <PerfilUsuario
-            perfil={perfilSelecionado}
-            eventos={eventosDoPerfil}
-            usuarioLogado={usuarioLogado}
-            onVoltar={voltarPagina}
-            abrirModalEditar={() => navegarPara("editar_perfil")}
-          />
-        )}
-
-        {/* FEED */}
-        {telaAtual === "feed" && (
-          <Feed
-            feed={feed}
-            novoPost={novoPost}
-            setNovoPost={setNovoPost}
-            handlePostarFeed={handlePostarFeed}
-            abrirPerfilUsuario={abrirPerfilUsuario}
-            usuarioLogado={usuarioLogado}
-            apagarPostFeed={apagarPostFeed}
-            editarPostFeed={editarPostFeed}
-          />
-        )}
-
-        {/* MEUS EVENTOS */}
-        {telaAtual === "meus_eventos" && (
-          <MeusEventos
-            eventos={eventos}
-            usuarioLogado={usuarioLogado}
-            onEditar={(e) => {
-              setEventoSendoEditado(e);
-
-              setShowModal(true);
-            }}
-            onExcluir={apagarEvento}
-          />
-        )}
-
-        {/* MEU PERFIL */}
-        {telaAtual === "meu_perfil" && (
-          <MeuPerfil
-            usuarioLogado={usuarioLogado}
-            setUsuarioLogado={setUsuarioLogado}
-            eventos={eventos}
-            abrirEditarPerfil={() => navegarPara("editar_perfil")}
-          />
-        )}
-
-        {/* EDITAR PERFIL */}
-        {telaAtual === "editar_perfil" && (
-          <ModalEditarPerfil
-            usuarioLogado={usuarioLogado}
-            setUsuarioLogado={setUsuarioLogado}
-            onFechar={() => voltarPagina()}
-          />
-        )}
-
-        {/* CONFIG */}
-        {telaAtual === "configuracoes" && (
-          <Configuracoes usuarioLogado={usuarioLogado} />
-        )}
-
-        {/* NOTIFICAÇÕES */}
-        {telaAtual === "notificacoes" && (
-          <Notificacoes
             notificacoes={notificacoes}
-            setNotificacoes={setNotificacoes}
+            voltarPagina={voltarPagina}
+          />
+
+          <AnimatePresence mode="wait">
+            {/* HOME */}
+            {telaAtual === "home" && (
+              <motion.div key="home" {...pageAnimation}>
+                <Home
+                  eventosAtivos={eventosAtivos}
+                  abrirDetalheEvento={abrirDetalheEvento}
+                  handleToggleInteresse={handleToggleInteresse}
+                  usuarioLogado={usuarioLogado}
+                  handlePostarFeed={handlePostarFeed}
+                  novoPost={novoPost}
+                  setNovoPost={setNovoPost}
+                  feed={feed}
+                  abrirPerfilUsuario={abrirPerfilUsuario}
+                  setTelaAtual={navegarPara}
+                />
+              </motion.div>
+            )}
+
+            {/* EVENTOS */}
+            {telaAtual === "eventos" && (
+              <motion.div key="eventos" {...pageAnimation}>
+                <ListaEventos
+                  eventos={eventos}
+                  abrirDetalheEvento={abrirDetalheEvento}
+                  handleToggleInteresse={handleToggleInteresse}
+                  usuarioLogado={usuarioLogado}
+                />
+              </motion.div>
+            )}
+
+            {/* ARTISTAS */}
+            {telaAtual === "artistas" && (
+              <motion.div key="artistas" {...pageAnimation}>
+                <Artistas
+                  eventos={eventos}
+                  abrirPerfilUsuario={abrirPerfilUsuario}
+                />
+              </motion.div>
+            )}
+
+            {/* DETALHE EVENTO */}
+            {telaAtual === "detalhe_evento" && (
+              <motion.div key="detalhe_evento" {...pageAnimation}>
+                <DetalheEvento
+                  evento={eventoSelecionado}
+                  onVoltar={voltarPagina}
+                />
+              </motion.div>
+            )}
+
+            {/* PERFIL USUÁRIO */}
+            {telaAtual === "perfil_usuario" && (
+              <motion.div key="perfil_usuario" {...pageAnimation}>
+                <PerfilUsuario
+                  perfil={perfilSelecionado}
+                  eventos={eventosDoPerfil}
+                  usuarioLogado={usuarioLogado}
+                  onVoltar={voltarPagina}
+                  abrirModalEditar={() => navegarPara("editar_perfil")}
+                />
+              </motion.div>
+            )}
+
+            {/* FEED */}
+            {telaAtual === "feed" && (
+              <motion.div key="feed" {...pageAnimation}>
+                <Feed
+                  feed={feed}
+                  novoPost={novoPost}
+                  setNovoPost={setNovoPost}
+                  handlePostarFeed={handlePostarFeed}
+                  abrirPerfilUsuario={abrirPerfilUsuario}
+                  usuarioLogado={usuarioLogado}
+                  apagarPostFeed={apagarPostFeed}
+                  editarPostFeed={editarPostFeed}
+                />
+              </motion.div>
+            )}
+
+            {/* MEUS EVENTOS */}
+            {telaAtual === "meus_eventos" && (
+              <motion.div key="meus_eventos" {...pageAnimation}>
+                <MeusEventos
+                  eventos={eventos}
+                  usuarioLogado={usuarioLogado}
+                  onEditar={(e) => {
+                    setEventoSendoEditado(e);
+                    setShowModal(true);
+                  }}
+                  onExcluir={apagarEvento}
+                />
+              </motion.div>
+            )}
+
+            {/* MEU PERFIL */}
+            {telaAtual === "meu_perfil" && (
+              <motion.div key="meu_perfil" {...pageAnimation}>
+                <MeuPerfil
+                  usuarioLogado={usuarioLogado}
+                  setUsuarioLogado={setUsuarioLogado}
+                  eventos={eventos}
+                  abrirEditarPerfil={() => navegarPara("editar_perfil")}
+                />
+              </motion.div>
+            )}
+
+            {/* EDITAR PERFIL */}
+            {telaAtual === "editar_perfil" && (
+              <motion.div key="editar_perfil" {...pageAnimation}>
+                <ModalEditarPerfil
+                  usuarioLogado={usuarioLogado}
+                  setUsuarioLogado={setUsuarioLogado}
+                  onFechar={voltarPagina}
+                />
+              </motion.div>
+            )}
+
+            {/* CONFIG */}
+            {telaAtual === "configuracoes" && (
+              <motion.div key="configuracoes" {...pageAnimation}>
+                <Configuracoes usuarioLogado={usuarioLogado} />
+              </motion.div>
+            )}
+
+            {/* NOTIFICAÇÕES */}
+            {telaAtual === "notificacoes" && (
+              <motion.div key="notificacoes" {...pageAnimation}>
+                <Notificacoes
+                  notificacoes={notificacoes}
+                  setNotificacoes={setNotificacoes}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* FOOTER */}
+          <Footer setTelaAtual={navegarPara} setShowModal={setShowModal} />
+        </main>
+
+        {/* MODAL EVENTO */}
+        {showModal && (
+          <ModalCriarEvento
+            fecharModal={() => {
+              setShowModal(false);
+              setEventoSendoEditado(null);
+            }}
+            onEventoCriado={carregarEventos}
+            eventoSendoEditado={eventoSendoEditado}
           />
         )}
-
-        {/* FOOTER */}
-        <Footer setTelaAtual={navegarPara} setShowModal={setShowModal} />
-      </main>
-
-      {/* MODAL EVENTO */}
-      {showModal && (
-        <ModalCriarEvento
-          fecharModal={() => {
-            setShowModal(false);
-
-            setEventoSendoEditado(null);
-          }}
-          onEventoCriado={carregarEventos}
-          eventoSendoEditado={eventoSendoEditado}
-        />
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
