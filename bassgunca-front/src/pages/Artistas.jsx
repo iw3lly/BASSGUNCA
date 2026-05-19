@@ -1,21 +1,19 @@
 import React, { useMemo, useState } from "react";
+import "./Artistas.css";
 
 function Artistas({ eventos, abrirPerfilUsuario }) {
   const [busca, setBusca] = useState("");
 
-  // Lógica pesada: Extrair, agrupar e rankear os artistas
   const rankingArtistas = useMemo(() => {
     const mapaArtistas = {};
 
     eventos.forEach((evento) => {
       if (!evento.lista_artistas) return;
 
-      // Pega os nomes, separa por vírgula e limpa os espaços
       const nomes = evento.lista_artistas
         .split(",")
         .map((nome) => nome.trim().toUpperCase());
 
-      // Calcula o hype do evento (quantas pessoas marcaram interesse)
       const hypeDoEvento =
         evento.interessados && evento.interessados.trim() !== ""
           ? evento.interessados.split(",").length
@@ -25,7 +23,11 @@ function Artistas({ eventos, abrirPerfilUsuario }) {
         if (!nome) return;
 
         if (!mapaArtistas[nome]) {
-          mapaArtistas[nome] = { nome: nome, totalEventos: 0, hypeTotal: 0 };
+          mapaArtistas[nome] = {
+            nome,
+            totalEventos: 0,
+            hypeTotal: 0,
+          };
         }
 
         mapaArtistas[nome].totalEventos += 1;
@@ -33,211 +35,144 @@ function Artistas({ eventos, abrirPerfilUsuario }) {
       });
     });
 
-    // Converte o objeto em array e ordena (Primeiro por Hype, depois por Eventos)
     return Object.values(mapaArtistas).sort(
       (a, b) => b.hypeTotal - a.hypeTotal || b.totalEventos - a.totalEventos,
     );
   }, [eventos]);
 
-  // Filtro da barra de busca
   const artistasFiltrados = rankingArtistas.filter((artista) =>
     artista.nome.includes(busca.toUpperCase()),
   );
 
-  return (
-    <div
-      style={{
-        padding: "40px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        width: "100%",
-      }}
-    >
-      {/* Header estilo Shotgun */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "40px",
-          flexWrap: "wrap",
-          gap: "20px",
-        }}
-      >
-        <h1
-          className="fonte-quadrada"
-          style={{
-            fontSize: "3rem",
-            color: "#fff",
-            margin: 0,
-            textTransform: "uppercase",
-          }}
-        >
-          ARTISTAS POPULARES
-        </h1>
+  const top3 = artistasFiltrados.slice(0, 3);
+  const restantes = artistasFiltrados.slice(3);
 
-        {/* Busca rápida */}
-        <div style={{ position: "relative", width: "300px" }}>
-          <span
-            style={{
-              position: "absolute",
-              left: "15px",
-              top: "10px",
-              fontSize: "1rem",
-            }}
-          >
-            🔎
-          </span>
+  return (
+    <div className="artistas-page">
+      {/* HERO */}
+      <section className="artistas-hero">
+        <div className="artistas-hero-blur"></div>
+
+        <div className="artistas-hero-content">
+          <span className="hero-tag fonte-quadrada">UNDERGROUND RANKING</span>
+
+          <h1 className="hero-title fonte-quadrada">
+            ARTISTAS
+            <br />
+            DA CENA
+          </h1>
+
+          <p className="hero-subtitle fonte-texto">
+            Descubra os nomes mais hypados do Bassgunça. DJs, produtores e
+            artistas movimentando o underground.
+          </p>
+
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <strong>{rankingArtistas.length}</strong>
+              <span>ARTISTAS</span>
+            </div>
+
+            <div className="hero-stat">
+              <strong>{eventos.length}</strong>
+              <span>EVENTOS</span>
+            </div>
+          </div>
+        </div>
+
+        {/* BUSCA */}
+        <div className="artistas-search-wrapper">
           <input
             type="text"
-            placeholder="Buscar artista..."
-            className="fonte-texto"
+            placeholder="BUSCAR ARTISTA..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "12px 15px 12px 40px",
-              fontSize: "1rem",
-              background: "#111",
-              border: "1px solid #333",
-              color: "#fff",
-              outline: "none",
-              borderRadius: "8px",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#ff003c")}
-            onBlur={(e) => (e.target.style.borderColor = "#333")}
+            className="artistas-search fonte-quadrada"
           />
         </div>
-      </div>
+      </section>
 
-      {/* Grid de Cards (2 colunas) */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {artistasFiltrados.map((artista, index) => {
-          // Lógica da medalha para o Top 3
-          let corMedalha = "";
-          if (index === 0)
-            corMedalha = "#ffcc00"; // Ouro
-          else if (index === 1)
-            corMedalha = "#c0c0c0"; // Prata
-          else if (index === 2) corMedalha = "#cd7f32"; // Bronze
+      {/* TOP 3 */}
+      {!busca && top3.length > 0 && (
+        <section className="top3-section">
+          <div className="section-header">
+            <h2 className="fonte-quadrada">TOP RANKING</h2>
+            <span className="fonte-texto">MAIS FORTES DA SEMANA</span>
+          </div>
 
-          return (
-            <div
-              key={artista.nome}
-              onClick={() => abrirPerfilUsuario(artista.nome)}
-              style={{
-                background: "#1a1a1a",
-                borderRadius: "8px",
-                padding: "20px",
-                display: "flex",
-                alignItems: "center",
-                gap: "20px",
-                cursor: "pointer",
-                transition: "background 0.2s, transform 0.2s",
-                border: "1px solid transparent",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#222";
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.borderColor = "#333";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#1a1a1a";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "transparent";
-              }}
-            >
-              {/* Avatar Redondo (Gerado com a inicial do artista) */}
-              <div style={{ position: "relative" }}>
+          <div className="top3-grid">
+            {top3.map((artista, index) => {
+              const medalClass =
+                index === 0 ? "gold" : index === 1 ? "silver" : "bronze";
+
+              return (
                 <div
-                  style={{
-                    width: "60px",
-                    height: "60px",
-                    borderRadius: "50%",
-                    background: "linear-gradient(135deg, #ff003c, #8a2be2)",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontSize: "1.5rem",
-                    fontWeight: "bold",
-                    color: "#fff",
-                  }}
+                  key={artista.nome}
+                  className={`top-card ${medalClass}`}
+                  onClick={() => abrirPerfilUsuario(artista.nome)}
                 >
-                  {artista.nome.charAt(0)}
+                  <div className="top-rank">#{index + 1}</div>
+
+                  <div className="top-avatar">{artista.nome.charAt(0)}</div>
+
+                  <h3 className="fonte-quadrada">{artista.nome}</h3>
+
+                  <div className="top-info">
+                    <span>🔥 {artista.hypeTotal} hype</span>
+
+                    <span>🎵 {artista.totalEventos} eventos</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* GRID */}
+      <section className="artists-grid-section">
+        <div className="section-header">
+          <h2 className="fonte-quadrada">TODOS OS ARTISTAS</h2>
+
+          <span className="fonte-texto">
+            {artistasFiltrados.length} encontrados
+          </span>
+        </div>
+
+        {artistasFiltrados.length === 0 ? (
+          <div className="empty-artists">
+            <h3 className="fonte-quadrada">NADA ENCONTRADO</h3>
+
+            <p className="fonte-texto">Tente outro nome.</p>
+          </div>
+        ) : (
+          <div className="artists-grid">
+            {(busca ? artistasFiltrados : restantes).map((artista) => (
+              <div
+                key={artista.nome}
+                className="artist-card"
+                onClick={() => abrirPerfilUsuario(artista.nome)}
+              >
+                <div className="artist-avatar">{artista.nome.charAt(0)}</div>
+
+                <div className="artist-content">
+                  <h3 className="fonte-quadrada">{artista.nome}</h3>
+
+                  <div className="artist-meta">
+                    <span>🔥 {artista.hypeTotal} hype</span>
+
+                    <span>•</span>
+
+                    <span>{artista.totalEventos} eventos</span>
+                  </div>
                 </div>
 
-                {/* Badge do Top 3 */}
-                {index < 3 && !busca && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "-5px",
-                      right: "-5px",
-                      background: corMedalha,
-                      color: "#000",
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      fontSize: "0.8rem",
-                      fontWeight: "bold",
-                      border: "2px solid #1a1a1a",
-                    }}
-                  >
-                    {index + 1}
-                  </div>
-                )}
+                <div className="artist-arrow">↗</div>
               </div>
-
-              {/* Infos do Artista */}
-              <div style={{ flex: 1 }}>
-                <h3
-                  className="fonte-quadrada"
-                  style={{
-                    fontSize: "1.6rem",
-                    color: "#fff",
-                    margin: "0 0 5px 0",
-                  }}
-                >
-                  {artista.nome}
-                </h3>
-                <p
-                  className="fonte-texto"
-                  style={{ fontSize: "0.9rem", color: "#aaa", margin: 0 }}
-                >
-                  <span style={{ color: "#ff003c" }}>
-                    {artista.hypeTotal} hype
-                  </span>{" "}
-                  • {artista.totalEventos}{" "}
-                  {artista.totalEventos === 1 ? "evento" : "eventos"} no radar
-                </p>
-              </div>
-            </div>
-          );
-        })}
-
-        {artistasFiltrados.length === 0 && (
-          <p
-            className="fonte-texto"
-            style={{
-              color: "#666",
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              padding: "40px",
-            }}
-          >
-            Nenhum artista encontrado com esse nome.
-          </p>
+            ))}
+          </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

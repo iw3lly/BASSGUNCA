@@ -1,38 +1,86 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { FaInstagram, FaSoundcloud, FaSpotify } from "react-icons/fa";
+import { SiLinktree } from "react-icons/si";
 
-function PerfilUsuario({ perfil, eventos, onVoltar, usuarioLogado }) {
+import "./PerfilUsuario.css";
+
+function PerfilUsuario({
+  perfil,
+  eventos = [],
+  onVoltar,
+  usuarioLogado,
+  abrirModalEditar,
+}) {
   const [abaEventos, setAbaEventos] = useState("produtor");
 
-  // Proteção caso o perfil demore a carregar
-  if (!perfil)
+  // =========================
+  // LOADING
+  // =========================
+  if (!perfil) {
     return (
-      <div style={{ color: "#fff", padding: "40px" }}>
-        Localizando sinal do usuário...
+      <div className="perfil-loading">
+        <div className="perfil-loading-box">
+          <div className="perfil-loading-dot"></div>
+
+          <p className="fonte-texto">Localizando sinal do usuário...</p>
+        </div>
       </div>
     );
+  }
 
-  // ==========================================
-  // LÓGICA DE FILTRAGEM (USANDO REGEX PARA EVITAR ERRO BEA/BEAT)
-  // ==========================================
-  const vulgoAlvo = String(perfil.vulgo || "").trim();
-  const regexPalavraExata = new RegExp(`\\b${vulgoAlvo}\\b`, "i");
+  // =========================
+  // NORMALIZAÇÃO
+  // =========================
+  const vulgoPerfil = String(perfil?.vulgo || "")
+    .trim()
+    .toLowerCase();
 
-  const eventosProdutor = (eventos || []).filter((e) => {
-    const criador = String(e.criado_por || "").trim();
-    return regexPalavraExata.test(criador);
-  });
+  const escaparRegex = (texto) => texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  const eventosLineup = (eventos || []).filter((e) => {
-    const titulo = String(e.titulo || "");
-    const lineUp = String(e.lista_artistas || e.programacao || "");
-    return regexPalavraExata.test(titulo) || regexPalavraExata.test(lineUp);
-  });
+  const regexPalavraExata = new RegExp(
+    `\\b${escaparRegex(vulgoPerfil)}\\b`,
+    "i",
+  );
 
-  const eventosInteressado = (eventos || []).filter((e) => {
-    const listaInteressados = String(e.interessados || "");
-    return regexPalavraExata.test(listaInteressados);
-  });
+  // =========================
+  // EVENTOS
+  // =========================
 
+  // EVENTOS PRODUZIDOS
+  const eventosProdutor = useMemo(() => {
+    return eventos.filter((e) => {
+      const criador = String(e?.criado_por || "")
+        .trim()
+        .toLowerCase();
+
+      return criador === vulgoPerfil;
+    });
+  }, [eventos, vulgoPerfil]);
+
+  // EVENTOS EM LINEUP
+  const eventosLineup = useMemo(() => {
+    return eventos.filter((e) => {
+      const artistas = String(
+        e?.lista_artistas || e?.programacao || "",
+      ).toLowerCase();
+
+      return regexPalavraExata.test(artistas);
+    });
+  }, [eventos, regexPalavraExata]);
+
+  // EVENTOS COM INTERESSE
+  const eventosInteressado = useMemo(() => {
+    return eventos.filter((e) => {
+      const interessados = String(e?.interessados || "")
+        .toLowerCase()
+        .split(",")
+        .map((i) => i.trim());
+
+      return interessados.includes(vulgoPerfil);
+    });
+  }, [eventos, vulgoPerfil]);
+
+  // EVENTOS DA ABA
   const eventosExibidos =
     abaEventos === "produtor"
       ? eventosProdutor
@@ -40,339 +88,273 @@ function PerfilUsuario({ perfil, eventos, onVoltar, usuarioLogado }) {
         ? eventosLineup
         : eventosInteressado;
 
-  // Verifica se o perfil visualizado é o do próprio usuário logado
+  // =========================
+  // PERFIL PRÓPRIO
+  // =========================
   const ehMeuProprioPerfil =
-    usuarioLogado?.vulgo?.toLowerCase() === perfil.vulgo?.toLowerCase();
+    String(usuarioLogado?.vulgo || "")
+      .trim()
+      .toLowerCase() === vulgoPerfil;
+
+  // =========================
+  // TAGS
+  // =========================
+  const listaFuncoes = (perfil?.funcao || perfil?.funcoes || "MEMBRO")
+    .split(",")
+    .map((f) => f.trim())
+    .filter(Boolean);
+
+  // =========================
+  // REDES SOCIAIS
+  // =========================
+  let links = {
+    instagram: "",
+    soundcloud: "",
+    spotify: "",
+    geral: "",
+  };
+
+  const rawRedes = perfil?.redes_sociais || perfil?.links || perfil?.redes;
+
+  try {
+    if (rawRedes) {
+      let parsed = rawRedes;
+
+      // JSON dentro de string
+      if (typeof parsed === "string" && parsed.trim().startsWith('"')) {
+        parsed = JSON.parse(parsed);
+      }
+
+      // String JSON normal
+      if (typeof parsed === "string" && parsed.trim().startsWith("{")) {
+        parsed = JSON.parse(parsed);
+      }
+
+      // Objeto
+      if (typeof parsed === "object") {
+        links = {
+          instagram: parsed.instagram || parsed.link_instagram || "",
+
+          soundcloud: parsed.soundcloud || parsed.link_soundcloud || "",
+
+          spotify: parsed.spotify || parsed.link_spotify || "",
+
+          geral: parsed.geral || parsed.linktree || parsed.link_geral || "",
+        };
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao parsear redes:", err);
+  }
+
+  // fallback campos separados
+  links.instagram = links.instagram || perfil?.link_instagram || "";
+
+  links.soundcloud = links.soundcloud || perfil?.link_soundcloud || "";
+
+  links.spotify = links.spotify || perfil?.link_spotify || "";
+
+  links.geral = links.geral || perfil?.link_geral || "";
 
   return (
-    <div
-      style={{
-        padding: "40px 20px",
-        maxWidth: "1000px",
-        margin: "0 auto",
-        color: "#fff",
-        paddingBottom: "100px",
-      }}
-    >
+    <div className="perfil-page">
       {/* BOTÃO VOLTAR */}
-      <button
-        onClick={onVoltar}
-        style={{
-          background: "transparent",
-          color: "#666",
-          border: "none",
-          cursor: "pointer",
-          marginBottom: "20px",
-          fontSize: "0.9rem",
-        }}
-      >
-        ← VOLTAR PARA O FEED
+      <button onClick={onVoltar} className="perfil-back-btn fonte-quadrada">
+        ← VOLTAR
       </button>
 
-      {/* HEADER DO PERFIL (IGUAL AO MEU PERFIL) */}
-      <div
-        style={{
-          background: "#050505",
-          padding: "40px",
-          borderRadius: "16px",
-          border: "1px solid #1a1a1a",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: "20px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "30px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <img
-            src={perfil.foto_perfil || "https://via.placeholder.com/150"}
-            alt="Perfil"
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "8px",
-              objectFit: "cover",
-              border: "2px solid #ff003c",
-            }}
-          />
+      {/* HERO */}
+      <div className="perfil-hero">
+        <div className="perfil-hero-overlay"></div>
 
-          <div>
-            <h2
-              className="fonte-quadrada"
-              style={{
-                fontSize: "3rem",
-                margin: 0,
-                textTransform: "uppercase",
-              }}
-            >
-              {perfil.vulgo || "BASSGUNÇO"}
-            </h2>
-            <p
-              className="fonte-texto"
-              style={{ color: "#888", margin: "0 0 15px 0" }}
-            >
-              {perfil.nome}
+        <div className="perfil-top">
+          {/* FOTO */}
+          <div className="perfil-avatar-wrap">
+            <img
+              src={perfil?.foto_perfil || "https://via.placeholder.com/300"}
+              alt="Perfil"
+              className="perfil-avatar"
+            />
+
+            <div className="perfil-status-ring"></div>
+          </div>
+
+          {/* INFO */}
+          <div className="perfil-info">
+            <span className="perfil-mini-tag fonte-quadrada">
+              PERFIL DA CENA
+            </span>
+
+            <h1 className="perfil-name fonte-quadrada">
+              {perfil?.vulgo || "BASSGUNÇA"}
+            </h1>
+
+            <p className="perfil-realname fonte-texto">
+              {perfil?.nome || "Usuário da plataforma"}
             </p>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                flexWrap: "wrap",
-                marginBottom: "15px",
-              }}
-            >
-              {(perfil.funcao ? perfil.funcao.split(", ") : ["Membro"]).map(
-                (f) => (
-                  <span
-                    key={f}
-                    className="fonte-quadrada"
-                    style={{
-                      background: "#1a1a1a",
-                      padding: "4px 10px",
-                      borderRadius: "4px",
-                      fontSize: "0.75rem",
-                      color: "#ff003c",
-                      border: "1px solid #ff003c",
-                    }}
-                  >
-                    {f.toUpperCase()}
-                  </span>
-                ),
-              )}
+            {/* TAGS */}
+            <div className="perfil-tags">
+              {listaFuncoes.map((funcao, index) => (
+                <span key={index} className="perfil-tag fonte-quadrada">
+                  {funcao.toUpperCase()}
+                </span>
+              ))}
             </div>
 
-            <p
-              className="fonte-texto"
-              style={{
-                color: "#ccc",
-                fontSize: "0.95rem",
-                lineHeight: "1.4",
-                margin: "0 0 15px 0",
-                maxWidth: "500px",
-              }}
-            >
-              {perfil.bio}
+            {/* BIO */}
+            <p className="perfil-bio fonte-texto">
+              {perfil?.bio || "Sem biografia definida."}
             </p>
 
-            {/* LINKS SOCIAIS */}
-            {/* APAGUE O CÓDIGO ANTIGO DAS REDES SOCIAIS E COLE ESTE: */}
-            <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-              {perfil?.link_instagram && (
+            {/* REDES */}
+            <div className="perfil-socials">
+              {links.instagram && (
                 <a
-                  href={perfil.link_instagram}
+                  href={links.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="perfil-social"
                 >
-                  <FaInstagram size={26} />
+                  <FaInstagram />
                 </a>
               )}
-              {perfil?.link_soundcloud && (
+
+              {links.soundcloud && (
                 <a
-                  href={perfil.link_soundcloud}
+                  href={links.soundcloud}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="perfil-social"
                 >
-                  <FaSoundcloud size={26} />
+                  <FaSoundcloud />
                 </a>
               )}
-              {perfil?.link_spotify && (
+
+              {links.spotify && (
                 <a
-                  href={perfil.link_spotify}
+                  href={links.spotify}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1DB954")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="perfil-social spotify"
                 >
-                  <FaSpotify size={26} />
+                  <FaSpotify />
                 </a>
               )}
-              {perfil?.link_geral && (
+
+              {links.geral && (
                 <a
-                  href={perfil.link_geral}
+                  href={links.geral}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="perfil-social"
                 >
-                  <SiLinktree size={24} />
+                  <SiLinktree />
                 </a>
               )}
             </div>
           </div>
+
+          {/* BOTÃO EDITAR */}
+          {ehMeuProprioPerfil && (
+            <button
+              className="perfil-edit-btn fonte-quadrada"
+              onClick={abrirModalEditar}
+            >
+              ✦ EDITAR PERFIL
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* STATS */}
+      <div className="perfil-stats">
+        <div className="perfil-stat-card">
+          <span className="perfil-stat-number fonte-quadrada">
+            {eventosProdutor.length}
+          </span>
+
+          <span className="perfil-stat-label fonte-texto">PRODUÇÕES</span>
         </div>
 
-        {/* SÓ MOSTRA O BOTÃO SE FOR O DONO DO PERFIL CLICANDO NO PRÓPRIO NOME NO FEED */}
-        {ehMeuProprioPerfil && (
-          <button
-            className="fonte-quadrada"
-            style={{
-              background: "transparent",
-              color: "#ff003c",
-              border: "1px solid #ff003c",
-              padding: "8px 15px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "0.8rem",
-            }}
-          >
-            EDITAR PERFIL
-          </button>
-        )}
+        <div className="perfil-stat-card">
+          <span className="perfil-stat-number fonte-quadrada">
+            {eventosLineup.length}
+          </span>
+
+          <span className="perfil-stat-label fonte-texto">LINEUPS</span>
+        </div>
+
+        <div className="perfil-stat-card">
+          <span className="perfil-stat-number fonte-quadrada">
+            {eventosInteressado.length}
+          </span>
+
+          <span className="perfil-stat-label fonte-texto">PRESENÇAS</span>
+        </div>
       </div>
 
-      {/* ABAS DE EVENTOS */}
-      <div
-        style={{
-          display: "flex",
-          gap: "40px",
-          marginTop: "40px",
-          borderBottom: "1px solid #1a1a1a",
-        }}
-      >
+      {/* ABAS */}
+      <div className="perfil-tabs">
         <button
           onClick={() => setAbaEventos("produtor")}
-          className="fonte-quadrada"
-          style={{
-            ...abaStyle,
-            borderBottom:
-              abaEventos === "produtor"
-                ? "2px solid #ff003c"
-                : "2px solid transparent",
-            color: abaEventos === "produtor" ? "#fff" : "#666",
-          }}
+          className={`perfil-tab fonte-quadrada ${
+            abaEventos === "produtor" ? "active" : ""
+          }`}
         >
-          PRODUÇÕES ({eventosProdutor.length})
+          PRODUÇÕES
         </button>
+
         <button
           onClick={() => setAbaEventos("lineup")}
-          className="fonte-quadrada"
-          style={{
-            ...abaStyle,
-            borderBottom:
-              abaEventos === "lineup"
-                ? "2px solid #ff003c"
-                : "2px solid transparent",
-            color: abaEventos === "lineup" ? "#fff" : "#666",
-          }}
+          className={`perfil-tab fonte-quadrada ${
+            abaEventos === "lineup" ? "active" : ""
+          }`}
         >
-          APARIÇÕES ({eventosLineup.length})
+          APARIÇÕES
         </button>
+
         <button
           onClick={() => setAbaEventos("interessado")}
-          className="fonte-quadrada"
-          style={{
-            ...abaStyle,
-            borderBottom:
-              abaEventos === "interessado"
-                ? "2px solid #ff003c"
-                : "2px solid transparent",
-            color: abaEventos === "interessado" ? "#fff" : "#666",
-          }}
+          className={`perfil-tab fonte-quadrada ${
+            abaEventos === "interessado" ? "active" : ""
+          }`}
         >
-          PRESENÇA ({eventosInteressado.length})
+          PRESENÇA
         </button>
       </div>
 
-      {/* GRID DE EVENTOS */}
-      <div style={{ marginTop: "30px" }}>
+      {/* EVENTOS */}
+      <div className="perfil-events-grid">
         {eventosExibidos.length === 0 ? (
-          <div
-            style={{
-              padding: "60px",
-              textAlign: "center",
-              background: "#0a0a0a",
-              borderRadius: "12px",
-              border: "1px dashed #222",
-            }}
-          >
-            <p className="fonte-texto" style={{ color: "#444" }}>
-              Nenhum evento registrado nesta categoria.
+          <div className="perfil-empty">
+            <p className="fonte-texto">
+              Nenhum evento encontrado nesta categoria.
             </p>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "20px",
-            }}
-          >
-            {eventosExibidos.map((evento) => (
-              <div
-                key={evento.id}
-                style={{
-                  background: "#0a0a0a",
-                  padding: "20px",
-                  borderRadius: "12px",
-                  border: "1px solid #1a1a1a",
-                }}
-              >
-                <h4
-                  className="fonte-quadrada"
-                  style={{
-                    margin: "0 0 10px 0",
-                    fontSize: "1.2rem",
-                    color: "#ff003c",
-                  }}
-                >
-                  {evento.titulo}
-                </h4>
-                <p
-                  className="fonte-texto"
-                  style={{
-                    margin: "0 0 5px 0",
-                    color: "#888",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  📍 {evento.local}
-                </p>
-                <p
-                  className="fonte-texto"
-                  style={{ margin: 0, color: "#666", fontSize: "0.8rem" }}
-                >
-                  📅 {new Date(evento.data_hora).toLocaleDateString("pt-BR")}
-                </p>
-              </div>
-            ))}
-          </div>
+          eventosExibidos.map((evento) => (
+            <div key={evento.id} className="perfil-event-card">
+              <div className="perfil-event-glow"></div>
+
+              <h3 className="fonte-quadrada">{evento.titulo}</h3>
+
+              <p className="fonte-texto">
+                📍 {evento.local || "Local indefinido"}
+              </p>
+
+              <span className="fonte-texto">
+                📅{" "}
+                {evento.data_hora
+                  ? new Date(evento.data_hora).toLocaleDateString("pt-BR")
+                  : "Sem data"}
+              </span>
+            </div>
+          ))
         )}
       </div>
     </div>
   );
 }
-
-const abaStyle = {
-  background: "transparent",
-  border: "none",
-  padding: "15px 5px",
-  fontSize: "0.9rem",
-  cursor: "pointer",
-  transition: "0.2s",
-};
 
 export default PerfilUsuario;

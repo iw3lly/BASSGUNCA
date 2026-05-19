@@ -1,0 +1,88 @@
+/* FUNDO GLOBAL */
+
+body {
+  background: #020202;
+  overflow-x: hidden;
+}
+
+/* GRADIENT BASE */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 0, 60, 0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(255, 0, 60, 0.08),
+      transparent 25%
+    ),
+    linear-gradient(180deg, #050505 0%, #020202 50%, #000000 100%);
+
+  pointer-events: none;
+}
+
+/* GLOW GIGANTE */
+
+body::after {
+  content: "";
+  position: fixed;
+
+  width: 700px;
+  height: 700px;
+
+  top: -200px;
+  right: -200px;
+
+  background: rgba(255, 0, 60, 0.08);
+
+  border-radius: 50%;
+
+  filter: blur(140px);
+
+  z-index: -2;
+
+  animation: pulseGlow 8s ease-in-out infinite alternate;
+
+  pointer-events: none;
+}
+
+/* TEXTURA / GRAIN */
+
+#root::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  background-image: url("https://www.transparenttextures.com/patterns/asfalt-dark.png");
+
+  opacity: 0.08;
+
+  mix-blend-mode: soft-light;
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+
+/* ANIMAÇÃO */
+
+@keyframes pulseGlow {
+  from {
+    transform: scale(1) translateY(0px);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: scale(1.2) translateY(40px);
+    opacity: 1;
+  }
+}

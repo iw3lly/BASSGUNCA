@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./Feed.css";
 
 function Feed({
   feed,
@@ -11,370 +12,196 @@ function Feed({
   editarPostFeed,
 }) {
   const [editandoId, setEditandoId] = useState(null);
-
   const [textoEditado, setTextoEditado] = useState("");
 
-  // =========================
-  // INICIAR EDIÇÃO
-  // =========================
   const iniciarEdicao = (post) => {
     setEditandoId(post.id);
-
     setTextoEditado(post.texto);
   };
 
-  // =========================
-  // SALVAR EDIÇÃO
-  // =========================
   const salvarEdicao = async (id) => {
     if (textoEditado.trim() !== "") {
       await editarPostFeed(id, textoEditado);
-
       setEditandoId(null);
     }
   };
 
   return (
-    <div
-      style={{
-        padding: "0 20px",
-        maxWidth: "800px",
-        margin: "0 auto",
-        paddingBottom: "80px",
-      }}
-    >
-      {/* =========================
-          HEADER
-      ========================= */}
-      <div
-        style={{
-          marginBottom: "40px",
-          marginTop: "20px",
-        }}
-      >
-        <h2
-          className="fonte-quadrada"
-          style={{
-            fontSize: "2.5rem",
-            color: "#fff",
-            margin: 0,
-          }}
-        >
-          🗣️ FEED DA CENA
-        </h2>
+    <div className="feed-page">
+      {/* HERO */}
+      <section className="feed-hero">
+        <div className="feed-hero-overlay"></div>
 
-        <p
-          className="fonte-texto"
-          style={{
-            color: "#aaa",
-            marginTop: "10px",
-          }}
-        >
-          Onde é o after? Quem tem VIP? Manda a visão pra comunidade.
-        </p>
-      </div>
+        <div className="feed-hero-content">
+          <span className="feed-badge fonte-quadrada">
+            ● COMUNIDADE AO VIVO
+          </span>
 
-      {/* =========================
-          FORM POST
-      ========================= */}
-      <form
-        className="feed-input"
-        onSubmit={handlePostarFeed}
-        style={{
-          marginBottom: "50px",
-          display: "flex",
-          gap: "15px",
-          background: "#0a0a0a",
-          padding: "20px",
-          borderRadius: "12px",
-          border: "1px solid #1a1a1a",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Escreve aí..."
-          className="fonte-texto"
-          value={novoPost}
-          onChange={(e) => setNovoPost(e.target.value)}
-          style={{
-            flex: 1,
-            padding: "15px 20px",
-            fontSize: "1.1rem",
-            background: "#050505",
-            border: "1px solid #333",
-            color: "#fff",
-            borderRadius: "8px",
-            outline: "none",
-          }}
-        />
+          <h1 className="feed-title fonte-quadrada">
+            FEED DA
+            <span> CENA</span>
+          </h1>
 
-        <button
-          type="submit"
-          className="fonte-quadrada"
-          style={{
-            padding: "0 30px",
-            background: "#ff003c",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "1.1rem",
-            transition: "background 0.2s",
-          }}
-          onMouseOver={(e) => {
-            e.target.style.background = "#cc0030";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = "#ff003c";
-          }}
-        >
-          POSTAR
-        </button>
-      </form>
+          <p className="feed-subtitle fonte-texto">
+            After, backstage, lineup vazado, VIP, set surpresa e toda a visão da
+            noite em tempo real.
+          </p>
+        </div>
+      </section>
 
-      {/* =========================
-          LISTA FEED
-      ========================= */}
-      <div
-        className="feed-list"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
+      {/* FORM */}
+      <section className="feed-create-card">
+        <div className="feed-create-header">
+          <div>
+            <p className="feed-create-label fonte-texto">POSTANDO COMO</p>
+
+            <h3 className="fonte-quadrada">
+              @{usuarioLogado?.vulgo || usuarioLogado?.nome}
+            </h3>
+          </div>
+
+          <div className="feed-live-dot"></div>
+        </div>
+
+        <form className="feed-form" onSubmit={handlePostarFeed}>
+          <textarea
+            placeholder="Manda a visão pra cena..."
+            className="feed-textarea fonte-texto"
+            value={novoPost}
+            onChange={(e) => setNovoPost(e.target.value)}
+            rows={4}
+          />
+
+          <div className="feed-form-footer">
+            <span className="feed-tip fonte-texto">
+              Seja direto. A cena tá lendo.
+            </span>
+
+            <button type="submit" className="feed-submit fonte-quadrada">
+              POSTAR →
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {/* POSTS */}
+      <section className="feed-posts">
         {feed.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "50px 0",
-              border: "1px dashed #333",
-              borderRadius: "12px",
-            }}
-          >
-            <p
-              className="fonte-texto"
-              style={{
-                color: "#666",
-                fontSize: "1.2rem",
-              }}
-            >
-              A timeline tá vazia. Seja o primeiro a puxar o bonde!
+          <div className="feed-empty">
+            <h2 className="fonte-quadrada">SEM MOVIMENTO</h2>
+
+            <p className="fonte-texto">
+              Ainda não tem ninguém puxando o bonde hoje.
             </p>
           </div>
         ) : (
-          feed.map((p) => {
+          feed.map((p, index) => {
             const isDono =
               usuarioLogado &&
               (usuarioLogado.vulgo === p.autor_vulgo ||
                 usuarioLogado.nome === p.autor_vulgo);
 
             return (
-              <div
+              <article
                 key={`${p.id}-${p.texto}`}
-                className="feed-item"
+                className="feed-card"
                 style={{
-                  background: "#050505",
-                  padding: "30px",
-                  borderRadius: "12px",
-                  border: "1px solid #111",
-                  borderLeft: "4px solid #ff003c",
-                  transition: "transform 0.2s",
-                  position: "relative",
+                  animationDelay: `${index * 0.05}s`,
                 }}
               >
-                {/* =========================
-                    TOPO DO POST
-                ========================= */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "15px",
-                  }}
-                >
-                  <strong
-                    className="fonte-quadrada"
-                    style={{
-                      color: "#fff",
-                      fontSize: "1.3rem",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => abrirPerfilUsuario(p.autor_vulgo)}
-                  >
-                    @{p.autor_vulgo}
-                  </strong>
+                {/* glow */}
+                <div className="feed-card-glow"></div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "15px",
-                    }}
-                  >
-                    {/* =========================
-                        BOTÕES DO DONO
-                    ========================= */}
-                    {isDono && (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                        }}
+                {/* topo */}
+                <div className="feed-card-top">
+                  <div className="feed-user">
+                    <div className="feed-avatar fonte-quadrada">
+                      {p.autor_vulgo?.charAt(0)?.toUpperCase()}
+                    </div>
+
+                    <div>
+                      <h3
+                        className="fonte-quadrada"
+                        onClick={() => abrirPerfilUsuario(p.autor_vulgo)}
                       >
-                        {editandoId !== p.id && (
-                          <button
-                            onClick={() => iniciarEdicao(p)}
-                            style={{
-                              background: "transparent",
-                              border: "none",
-                              cursor: "pointer",
-                              opacity: 0.7,
-                            }}
-                            title="Editar"
-                          >
-                            ✏️
-                          </button>
-                        )}
+                        @{p.autor_vulgo}
+                      </h3>
 
-                        <button
-                          onClick={() => apagarPostFeed(p.id)}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            opacity: 0.7,
-                          }}
-                          title="Apagar"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    )}
+                      <p className="fonte-texto">
+                        {p.data_criacao
+                          ? `${new Date(p.data_criacao).toLocaleDateString(
+                              "pt-BR",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                              },
+                            )} • ${new Date(p.data_criacao).toLocaleTimeString(
+                              "pt-BR",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}`
+                          : "Agora mesmo"}
 
-                    {/* =========================
-                        DATA
-                    ========================= */}
-                    <span
-                      className="fonte-texto"
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "#666",
-                        textAlign: "right",
-                      }}
-                    >
-                      {p.data_criacao
-                        ? `${new Date(p.data_criacao).toLocaleDateString(
-                            "pt-BR",
-                            {
-                              day: "2-digit",
-                              month: "2-digit",
-                            },
-                          )} às ${new Date(p.data_criacao).toLocaleTimeString(
-                            "pt-BR",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}`
-                        : "Agora"}
-
-                      <br />
-
-                      {Number(p.editado) === 1 && (
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "#555",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          (editado)
-                        </span>
-                      )}
-                    </span>
+                        {Number(p.editado) === 1 && " • editado"}
+                      </p>
+                    </div>
                   </div>
+
+                  {isDono && (
+                    <div className="feed-actions">
+                      {editandoId !== p.id && (
+                        <button onClick={() => iniciarEdicao(p)} title="Editar">
+                          ✏️
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => apagarPostFeed(p.id)}
+                        title="Apagar"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* =========================
-                    MODO EDIÇÃO
-                ========================= */}
+                {/* conteúdo */}
                 {editandoId === p.id ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginTop: "10px",
-                    }}
-                  >
-                    <input
-                      type="text"
+                  <div className="feed-edit-box">
+                    <textarea
                       value={textoEditado}
                       onChange={(e) => setTextoEditado(e.target.value)}
-                      className="fonte-texto"
-                      style={{
-                        flex: 1,
-                        padding: "10px",
-                        background: "#000",
-                        border: "1px solid #333",
-                        color: "#fff",
-                        borderRadius: "6px",
-                        outline: "none",
-                      }}
+                      className="feed-edit-input fonte-texto"
+                      rows={4}
                       autoFocus
                     />
 
-                    <button
-                      onClick={() => salvarEdicao(p.id)}
-                      style={{
-                        background: "#ff003c",
-                        color: "#fff",
-                        border: "none",
-                        padding: "0 15px",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Salvar
-                    </button>
+                    <div className="feed-edit-actions">
+                      <button
+                        className="feed-save-btn fonte-quadrada"
+                        onClick={() => salvarEdicao(p.id)}
+                      >
+                        SALVAR
+                      </button>
 
-                    <button
-                      onClick={() => setEditandoId(null)}
-                      style={{
-                        background: "transparent",
-                        color: "#666",
-                        border: "1px solid #333",
-                        padding: "0 15px",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Cancelar
-                    </button>
+                      <button
+                        className="feed-cancel-btn fonte-quadrada"
+                        onClick={() => setEditandoId(null)}
+                      >
+                        CANCELAR
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  /* =========================
-                      TEXTO NORMAL
-                  ========================= */
-                  <p
-                    className="fonte-texto"
-                    style={{
-                      fontSize: "1.15rem",
-                      lineHeight: "1.6",
-                      color: "#ddd",
-                      margin: 0,
-                    }}
-                  >
-                    {p.texto}
-                  </p>
+                  <p className="feed-content fonte-texto">{p.texto}</p>
                 )}
-              </div>
+              </article>
             );
           })
         )}
-      </div>
+      </section>
     </div>
   );
 }

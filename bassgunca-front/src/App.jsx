@@ -2,32 +2,44 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 import logoImg from "./assets/logo.png";
+
 import Login from "./Login";
+
+import Home from "./pages/Home";
+import ListaEventos from "./pages/ListaEventos";
 import DetalheEvento from "./pages/DetalheEvento";
 import PerfilUsuario from "./pages/PerfilUsuario";
-import ListaEventos from "./pages/ListaEventos";
-import Home from "./pages/Home";
-import Footer from "./components/Footer";
-import Sidebar from "./components/Sidebar";
+import Configuracoes from "./pages/Configuracoes";
+import Notificacoes from "./pages/Notificacoes";
 import Artistas from "./pages/Artistas";
-import ModalCriarEvento from "./components/ModalCriarEvento";
+
+import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
+
 import Feed from "./components/Feed";
 import MeusEventos from "./components/MeusEventos";
 import MeuPerfil from "./components/MeuPerfil";
-import Configuracoes from "./pages/Configuracoes";
-import Notificacoes from "./pages/Notificacoes";
-import { usuariosAPI, eventosAPI } from "./services/api";
+import ModalCriarEvento from "./components/ModalCriarEvento";
+import ModalEditarPerfil from "./components/ModalEditarPerfil";
 
-// 👇 NOSSOS CUSTOM HOOKS 👇
+import { usuariosAPI } from "./services/api";
+
+import "./styles/GlobalBackground.css";
+
 import { useSessao } from "./hooks/useSessao";
 import { useFeed } from "./hooks/useFeed";
 import { useEventos } from "./hooks/useEventos";
 
 function App() {
-  // 1. INICIANDO OS HOOKS
+  // =========================================
+  // SESSÃO
+  // =========================================
   const { usuarioLogado, setUsuarioLogado, handleSair } = useSessao();
 
+  // =========================================
+  // FEED
+  // =========================================
   const {
     feed,
     novoPost,
@@ -38,6 +50,9 @@ function App() {
     apagarPostFeed,
   } = useFeed(usuarioLogado);
 
+  // =========================================
+  // EVENTOS
+  // =========================================
   const {
     eventos,
     eventosAtivos,
@@ -50,14 +65,24 @@ function App() {
     setEventoSendoEditado,
   } = useEventos(usuarioLogado);
 
-  // 2. ESTADOS DE INTERFACE (Telas, Notificações e Modais)
+  // =========================================
+  // INTERFACE
+  // =========================================
   const [telaAtual, setTelaAtual] = useState("home");
+
+  const [historicoTelas, setHistoricoTelas] = useState([]);
+
   const [notificacoes, setNotificacoes] = useState([]);
+
   const [showModal, setShowModal] = useState(false);
+
   const [perfilSelecionado, setPerfilSelecionado] = useState(null);
+
   const [eventosDoPerfil, setEventosDoPerfil] = useState([]);
 
-  // 3. CARREGAMENTO INICIAL
+  // =========================================
+  // CARREGAMENTO
+  // =========================================
   const carregarTudo = async () => {
     await Promise.all([carregarEventos(), carregarFeed()]);
   };
@@ -66,15 +91,52 @@ function App() {
     if (usuarioLogado) {
       carregarTudo();
     }
-  }, [usuarioLogado, telaAtual]); // Mantivemos a telaAtual para não precisar de F5!
+  }, [usuarioLogado]);
 
-  // 4. FUNÇÕES DE INTERFACE E INTEGRAÇÃO
+  // =========================================
+  // SCROLL TO TOP
+  // =========================================
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [telaAtual]);
+
+  // =========================================
+  // NAVEGAÇÃO
+  // =========================================
+  const navegarPara = (novaTela) => {
+    setHistoricoTelas((prev) => [...prev, telaAtual]);
+
+    setTelaAtual(novaTela);
+  };
+
+  const voltarPagina = () => {
+    if (historicoTelas.length === 0) {
+      setTelaAtual("home");
+      return;
+    }
+
+    const historicoAtualizado = [...historicoTelas];
+
+    const ultimaTela = historicoAtualizado.pop();
+
+    setHistoricoTelas(historicoAtualizado);
+
+    setTelaAtual(ultimaTela || "home");
+  };
+
+  // =========================================
+  // LOGIN
+  // =========================================
   const handleLoginSuccess = async (usuario) => {
     const nomeExibicao = (
       usuario.vulgo ||
       usuario.nome ||
       "USUÁRIO"
     ).toUpperCase();
+
     setNotificacoes([
       {
         id: Date.now(),
@@ -84,74 +146,109 @@ function App() {
         tempo: "Agora mesmo",
       },
     ]);
+
     const session = {
       usuario: usuario,
       expiresAt: Date.now() + 12 * 60 * 60 * 1000,
     };
+
     localStorage.setItem("@bassgunca:user_session", JSON.stringify(session));
+
     setUsuarioLogado(usuario);
+
     await carregarTudo();
   };
 
+  // =========================================
+  // PERFIL USUÁRIO
+  // =========================================
   const abrirPerfilUsuario = async (vulgoClicado) => {
     try {
-      const resposta = await usuariosAPI.buscar(vulgoClicado); // 👈 Usando a API
+      const resposta = await usuariosAPI.buscar(vulgoClicado);
+
       const dadosUtilizador = await resposta.json();
+
       setPerfilSelecionado(
         resposta.ok
           ? dadosUtilizador
-          : { vulgo: vulgoClicado, nome: "Artista da Cena" },
+          : {
+              vulgo: vulgoClicado,
+              nome: "Artista da Cena",
+            },
       );
 
-      const regexPalavraExata = new RegExp(`\\b${vulgoClicado}\\b`, "i");
+      const regexPalavraExata = new RegExp(
+        `\\b${String(vulgoClicado).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "i",
+      );
+
       setEventosDoPerfil(
         eventos.filter(
-          (e) => e.lista_artistas && regexPalavraExata.test(e.lista_artistas),
+          (e) =>
+            regexPalavraExata.test(e.criado_por || "") ||
+            regexPalavraExata.test(e.lista_artistas || "") ||
+            regexPalavraExata.test(e.interessados || ""),
         ),
       );
-      setTelaAtual("perfil_usuario");
+
+      navegarPara("perfil_usuario");
     } catch (erro) {
-      setPerfilSelecionado({ vulgo: vulgoClicado });
-      setTelaAtual("perfil_usuario");
+      console.error("Erro ao abrir perfil:", erro);
+
+      setPerfilSelecionado({
+        vulgo: vulgoClicado,
+      });
+
+      navegarPara("perfil_usuario");
     }
   };
 
-  const voltarParaHome = () => {
-    setTelaAtual("home");
-    setEventoSelecionado(null);
-    setPerfilSelecionado(null);
+  // =========================================
+  // DETALHE EVENTO
+  // =========================================
+  const abrirDetalheEvento = (evento) => {
+    setEventoSelecionado(evento);
+
+    navegarPara("detalhe_evento");
   };
 
-  // 5. RENDERIZAÇÃO
+  // =========================================
+  // LOADING LOGIN
+  // =========================================
   if (!usuarioLogado) {
     return <Login onLogin={handleLoginSuccess} />;
   }
 
+  // =========================================
+  // RENDER
+  // =========================================
   return (
     <div className="dashboard-container">
+      {/* SIDEBAR */}
       <Sidebar
         logoImg={logoImg}
         telaAtual={telaAtual}
-        setTelaAtual={setTelaAtual}
-        voltarParaHome={voltarParaHome}
+        setTelaAtual={navegarPara}
+        voltarParaHome={() => navegarPara("home")}
         handleSair={handleSair}
       />
 
+      {/* MAIN */}
       <main className="main-content">
+        {/* HEADER */}
         <Header
           usuarioLogado={usuarioLogado}
           setShowModal={setShowModal}
-          setTelaAtual={setTelaAtual}
+          setTelaAtual={navegarPara}
           notificacoes={notificacoes}
+          voltarPagina={voltarPagina}
         />
 
+        {/* HOME */}
         {telaAtual === "home" && (
           <Home
             eventosAtivos={eventosAtivos}
-            abrirDetalheEvento={(e) => {
-              setEventoSelecionado(e);
-              setTelaAtual("detalhe_evento");
-            }}
+            abrirDetalheEvento={abrirDetalheEvento}
             handleToggleInteresse={handleToggleInteresse}
             usuarioLogado={usuarioLogado}
             handlePostarFeed={handlePostarFeed}
@@ -159,39 +256,42 @@ function App() {
             setNovoPost={setNovoPost}
             feed={feed}
             abrirPerfilUsuario={abrirPerfilUsuario}
-            setTelaAtual={setTelaAtual}
+            setTelaAtual={navegarPara}
           />
         )}
 
+        {/* EVENTOS */}
         {telaAtual === "eventos" && (
           <ListaEventos
             eventos={eventos}
-            abrirDetalheEvento={(e) => {
-              setEventoSelecionado(e);
-              setTelaAtual("detalhe_evento");
-            }}
+            abrirDetalheEvento={abrirDetalheEvento}
             handleToggleInteresse={handleToggleInteresse}
             usuarioLogado={usuarioLogado}
           />
         )}
 
+        {/* ARTISTAS */}
         {telaAtual === "artistas" && (
           <Artistas eventos={eventos} abrirPerfilUsuario={abrirPerfilUsuario} />
         )}
 
+        {/* DETALHE EVENTO */}
         {telaAtual === "detalhe_evento" && (
-          <DetalheEvento evento={eventoSelecionado} onVoltar={voltarParaHome} />
+          <DetalheEvento evento={eventoSelecionado} onVoltar={voltarPagina} />
         )}
 
+        {/* PERFIL USUÁRIO */}
         {telaAtual === "perfil_usuario" && (
           <PerfilUsuario
             perfil={perfilSelecionado}
             eventos={eventosDoPerfil}
             usuarioLogado={usuarioLogado}
-            onVoltar={voltarParaHome}
+            onVoltar={voltarPagina}
+            abrirModalEditar={() => navegarPara("editar_perfil")}
           />
         )}
 
+        {/* FEED */}
         {telaAtual === "feed" && (
           <Feed
             feed={feed}
@@ -205,30 +305,45 @@ function App() {
           />
         )}
 
+        {/* MEUS EVENTOS */}
         {telaAtual === "meus_eventos" && (
           <MeusEventos
             eventos={eventos}
             usuarioLogado={usuarioLogado}
             onEditar={(e) => {
               setEventoSendoEditado(e);
+
               setShowModal(true);
             }}
             onExcluir={apagarEvento}
           />
         )}
 
+        {/* MEU PERFIL */}
         {telaAtual === "meu_perfil" && (
           <MeuPerfil
             usuarioLogado={usuarioLogado}
             setUsuarioLogado={setUsuarioLogado}
             eventos={eventos}
+            abrirEditarPerfil={() => navegarPara("editar_perfil")}
           />
         )}
 
+        {/* EDITAR PERFIL */}
+        {telaAtual === "editar_perfil" && (
+          <ModalEditarPerfil
+            usuarioLogado={usuarioLogado}
+            setUsuarioLogado={setUsuarioLogado}
+            onFechar={() => voltarPagina()}
+          />
+        )}
+
+        {/* CONFIG */}
         {telaAtual === "configuracoes" && (
           <Configuracoes usuarioLogado={usuarioLogado} />
         )}
 
+        {/* NOTIFICAÇÕES */}
         {telaAtual === "notificacoes" && (
           <Notificacoes
             notificacoes={notificacoes}
@@ -236,13 +351,16 @@ function App() {
           />
         )}
 
-        <Footer setTelaAtual={setTelaAtual} setShowModal={setShowModal} />
+        {/* FOOTER */}
+        <Footer setTelaAtual={navegarPara} setShowModal={setShowModal} />
       </main>
 
+      {/* MODAL EVENTO */}
       {showModal && (
         <ModalCriarEvento
           fecharModal={() => {
             setShowModal(false);
+
             setEventoSendoEditado(null);
           }}
           onEventoCriado={carregarEventos}

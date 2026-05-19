@@ -242,7 +242,7 @@
 .community-input {
   flex: 1;
   min-width: 260px;
-  background: #050505;
+  background: transparent;
   border: 1px solid #222;
   border-radius: 14px;
   padding: 18px 20px;
@@ -279,7 +279,7 @@
 }
 
 .community-post {
-  background: #050505;
+  background: transparent;
   border: 1px solid #161616;
   border-radius: 18px;
   padding: 22px;

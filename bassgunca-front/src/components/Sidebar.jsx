@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Sidebar.css";
 
 function Sidebar({
@@ -8,21 +8,12 @@ function Sidebar({
   voltarParaHome,
   handleSair,
 }) {
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
-    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+    <aside className="sidebar">
       {/* TOPO */}
       <div className="sidebar-top">
         <div className="sidebar-header">
           <img src={logoImg} alt="Logo" className="logo-img-side" />
-
-          <button
-            className="collapse-btn"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? "☰" : "✕"}
-          </button>
         </div>
 
         <div className="sidebar-status">
@@ -32,14 +23,16 @@ function Sidebar({
         </div>
       </div>
 
-      {/* MENU */}
+      {/* MENU PRINCIPAL */}
       <nav className="menu-nav">
         <div
           className={`menu-item ${telaAtual === "home" ? "ativo" : ""}`}
           onClick={voltarParaHome}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">⌂</span>
+
           <span className="menu-text fonte-quadrada">HOME</span>
         </div>
 
@@ -48,7 +41,9 @@ function Sidebar({
           onClick={() => setTelaAtual("eventos")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">◈</span>
+
           <span className="menu-text fonte-quadrada">EVENTOS</span>
         </div>
 
@@ -57,7 +52,9 @@ function Sidebar({
           onClick={() => setTelaAtual("artistas")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">♫</span>
+
           <span className="menu-text fonte-quadrada">ARTISTAS</span>
         </div>
 
@@ -66,21 +63,25 @@ function Sidebar({
           onClick={() => setTelaAtual("feed")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">◎</span>
+
           <span className="menu-text fonte-quadrada">FEED</span>
         </div>
       </nav>
 
       <div style={{ flexGrow: 1 }}></div>
 
-      {/* ÁREA USER */}
+      {/* MENU INFERIOR */}
       <nav className="menu-nav menu-bottom">
         <div
           className={`menu-item ${telaAtual === "meus_eventos" ? "ativo" : ""}`}
           onClick={() => setTelaAtual("meus_eventos")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">▣</span>
+
           <span className="menu-text fonte-quadrada">MEUS EVENTOS</span>
         </div>
 
@@ -89,7 +90,9 @@ function Sidebar({
           onClick={() => setTelaAtual("meu_perfil")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">◉</span>
+
           <span className="menu-text fonte-quadrada">MEU PERFIL</span>
         </div>
 
@@ -100,7 +103,9 @@ function Sidebar({
           onClick={() => setTelaAtual("configuracoes")}
         >
           <div className="menu-indicator"></div>
+
           <span className="menu-icon">⚙</span>
+
           <span className="menu-text fonte-quadrada">CONFIG</span>
         </div>
       </nav>
@@ -108,6 +113,7 @@ function Sidebar({
       {/* SAIR */}
       <button className="btn-sair fonte-quadrada" onClick={handleSair}>
         <span className="menu-icon">⤴</span>
+
         <span className="menu-text">SAIR</span>
       </button>
     </aside>

@@ -323,12 +323,12 @@ const Configuracoes = ({ usuarioLogado }) => {
       </div>
 
       <style>{`
-        .bloco-config { background: #050505; padding: 40px; border: 1px solid #1a1a1a; position: relative; }
+        .bloco-config { background: transparent; padding: 40px; border: 1px solid #1a1a1a; position: relative; }
         .titulo-bloco { color: '#fff'; margin-bottom: 30px; font-size: 1.2rem; display: flex; align-items: center; gap: 15px; font-family: 'Space Mono', monospace; text-transform: uppercase; }
         .tag-numero { background: #ff003c; color: #000; padding: 2px 8px; font-size: 1rem; }
         .tag-numero.hazard { background: transparent; border: 1px solid #ff003c; color: #ff003c; }
         
-        .caixa-input { background: #0a0a0a; padding: 20px; border: 1px dashed #222; }
+        .caixa-input { background: transparent; padding: 20px; border: 1px dashed #222; }
         .caixa-input label { display: block; color: #888; margin-bottom: 10px; font-size: 0.8rem; letter-spacing: 1px; font-family: monospace; }
         .caixa-input input { background: #000; border: 1px solid #333; border-bottom: 2px solid #555; padding: 15px; color: #fff; width: 100%; outline: none; font-family: monospace; font-size: 1rem; transition: all 0.3s; box-sizing: border-box; }
         .caixa-input input:focus { border-color: #ff003c; background: #050000; box-shadow: 0 0 10px rgba(255,0,60,0.1); }

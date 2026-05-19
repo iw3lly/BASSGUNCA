@@ -160,7 +160,7 @@ body,
 }
 .stat-card {
   flex: 1;
-  background: #0a0a0a;
+  background: transparent;
   border: 1px solid #1a1a1a;
   padding: 20px;
   border-radius: 4px;
@@ -269,7 +269,7 @@ body,
   z-index: 9999;
 }
 .modal-box {
-  background: #0a0a0a;
+  background: transparent;
   border: 1px solid var(--vermelho-neon);
   padding: 30px;
   width: 90%;
@@ -289,7 +289,7 @@ body,
   width: 6px;
 }
 .feed-list::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: transparent;
 }
 .feed-list::-webkit-scrollbar-thumb {
   background: var(--vermelho-neon);

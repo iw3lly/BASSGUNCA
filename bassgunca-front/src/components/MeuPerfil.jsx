@@ -1,131 +1,94 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaInstagram, FaSoundcloud, FaSpotify } from "react-icons/fa";
+
 import { SiLinktree } from "react-icons/si";
+
 import ModalEditarPerfil from "./ModalEditarPerfil";
 
-const abaStyle = {
-  background: "transparent",
-  border: "none",
-  padding: "15px 5px",
-  fontSize: "0.9rem",
-  cursor: "pointer",
-  transition: "0.2s",
-  letterSpacing: "1px",
-};
+import "./MeuPerfil.css";
 
-function MeuPerfil({ usuarioLogado, setUsuarioLogado, eventos }) {
+function MeuPerfil({ usuarioLogado, setUsuarioLogado, eventos = [] }) {
   const [modoEdicao, setModoEdicao] = useState(false);
+
   const [abaEventos, setAbaEventos] = useState("produtor");
+
   const [dadosCompletos, setDadosCompletos] = useState(usuarioLogado);
 
   // =========================
-  // BUSCAR DADOS ATUALIZADOS
+  // CARREGAR DADOS
   // =========================
   useEffect(() => {
-    const carregarDadosFrescos = async () => {
+    const carregarDados = async () => {
       try {
         const resposta = await fetch(
-          `http://localhost:3000/api/usuarios/buscar/${encodeURIComponent(usuarioLogado?.vulgo || "")}`,
+          `http://localhost:3000/api/usuarios/buscar/${encodeURIComponent(
+            usuarioLogado?.vulgo || "",
+          )}`,
         );
+
         if (resposta.ok) {
-          const dadosDoBanco = await resposta.json();
-          setDadosCompletos(dadosDoBanco);
-          if (setUsuarioLogado) setUsuarioLogado(dadosDoBanco);
+          const dados = await resposta.json();
+
+          setDadosCompletos(dados);
+
+          if (setUsuarioLogado) {
+            setUsuarioLogado(dados);
+          }
         }
       } catch (erro) {
-        console.error("Erro ao puxar dados:", erro);
+        console.error("Erro ao carregar perfil:", erro);
       }
     };
 
-    if (!modoEdicao && usuarioLogado?.vulgo) {
-      carregarDadosFrescos();
+    if (usuarioLogado?.vulgo && !modoEdicao) {
+      carregarDados();
     }
-  }, [usuarioLogado?.vulgo, modoEdicao, setUsuarioLogado]);
+  }, [usuarioLogado, modoEdicao, setUsuarioLogado]);
 
   // =========================
-  // TROCA DE TELA (SEM MODAL)
-  // =========================
-  if (modoEdicao) {
-    return (
-      <ModalEditarPerfil
-        usuarioLogado={dadosCompletos}
-        setUsuarioLogado={setUsuarioLogado}
-        onFechar={() => setModoEdicao(false)}
-      />
-    );
-  }
-
-  // =========================
-  // PARSE DE REDES SOCIAIS (BLINDADO - PASSO 1)
-  // =========================
-  let links = { instagram: "", soundcloud: "", spotify: "", geral: "" };
-  const rawRedes = dadosCompletos?.redes_sociais;
-
-  if (rawRedes) {
-    try {
-      let parsedData = rawRedes;
-
-      // Descasca a string se o banco tiver colocado aspas duplas em volta
-      if (typeof parsedData === "string" && parsedData.trim().startsWith('"')) {
-        parsedData = JSON.parse(parsedData);
-      }
-
-      // Agora verifica se realmente é um JSON
-      if (typeof parsedData === "string" && parsedData.trim().startsWith("{")) {
-        links = { ...links, ...JSON.parse(parsedData) };
-      } else if (typeof parsedData === "object") {
-        links = { ...links, ...parsedData };
-      } else {
-        // Se for só um texto normal solto
-        links.geral = rawRedes;
-      }
-    } catch (e) {
-      console.error("Erro ao parsear redes:", e);
-      links.geral = typeof rawRedes === "string" ? rawRedes : "";
-    }
-  }
-
-  // =========================
-  // FUNÇÕES / TAGS
-  // =========================
-  const funcoesStr =
-    dadosCompletos?.funcoes || dadosCompletos?.funcao || "MEMBRO";
-  const listaTags = funcoesStr.split(",").filter((f) => f.trim() !== "");
-
-  const funcoesUpper = funcoesStr.toUpperCase();
-  const ehProdutor =
-    funcoesUpper.includes("PRODUTOR") || funcoesUpper.includes("EVENTO");
-
-  // =========================
-  // EVENTOS
+  // NORMALIZAÇÃO
   // =========================
   const meuVulgo = String(dadosCompletos?.vulgo || "")
     .trim()
     .toLowerCase();
 
-  const eventosProdutor = (eventos || []).filter(
-    (e) =>
-      String(e.criado_por || "")
+  const escaparRegex = (texto) => texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const regexPalavraExata = new RegExp(`\\b${escaparRegex(meuVulgo)}\\b`, "i");
+
+  // =========================
+  // EVENTOS
+  // =========================
+  const eventosProdutor = useMemo(() => {
+    return eventos.filter((e) => {
+      const criador = String(e?.criado_por || "")
         .trim()
-        .toLowerCase() === meuVulgo,
-  );
+        .toLowerCase();
 
-  const eventosLineup = (eventos || []).filter((e) => {
-    if (!meuVulgo) return false;
-    const regex = new RegExp(`\\b${meuVulgo}\\b`, "i");
-    return (
-      regex.test(String(e.titulo || "")) ||
-      regex.test(String(e.lista_artistas || e.programacao || ""))
-    );
-  });
+      return criador === meuVulgo;
+    });
+  }, [eventos, meuVulgo]);
 
-  const eventosInteressado = (eventos || []).filter(
-    (e) =>
-      meuVulgo &&
-      String(e.interessados || "")
+  const eventosLineup = useMemo(() => {
+    return eventos.filter((e) => {
+      const artistas = String(
+        e?.lista_artistas || e?.programacao || "",
+      ).toLowerCase();
+
+      return regexPalavraExata.test(artistas);
+    });
+  }, [eventos, regexPalavraExata]);
+
+  const eventosInteressado = useMemo(() => {
+    return eventos.filter((e) => {
+      const interessados = String(e?.interessados || "")
         .toLowerCase()
-        .includes(meuVulgo),
-  );
+        .split(",")
+        .map((i) => i.trim());
+
+      return interessados.includes(meuVulgo);
+    });
+  }, [eventos, meuVulgo]);
 
   const eventosExibidos =
     abaEventos === "produtor"
@@ -135,260 +98,285 @@ function MeuPerfil({ usuarioLogado, setUsuarioLogado, eventos }) {
         : eventosInteressado;
 
   // =========================
+  // TAGS
+  // =========================
+  const listaFuncoes = (
+    dadosCompletos?.funcao ||
+    dadosCompletos?.funcoes ||
+    "MEMBRO"
+  )
+    .split(",")
+    .map((f) => f.trim())
+    .filter(Boolean);
+
+  // =========================
+  // REDES
+  // =========================
+  let links = {
+    instagram: "",
+    soundcloud: "",
+    spotify: "",
+    geral: "",
+  };
+
+  const rawRedes =
+    dadosCompletos?.redes_sociais ||
+    dadosCompletos?.links ||
+    dadosCompletos?.redes;
+
+  try {
+    if (rawRedes) {
+      let parsed = rawRedes;
+
+      if (typeof parsed === "string" && parsed.trim().startsWith('"')) {
+        parsed = JSON.parse(parsed);
+      }
+
+      if (typeof parsed === "string" && parsed.trim().startsWith("{")) {
+        parsed = JSON.parse(parsed);
+      }
+
+      if (typeof parsed === "object") {
+        links = {
+          instagram: parsed.instagram || parsed.link_instagram || "",
+
+          soundcloud: parsed.soundcloud || parsed.link_soundcloud || "",
+
+          spotify: parsed.spotify || parsed.link_spotify || "",
+
+          geral: parsed.geral || parsed.linktree || parsed.link_geral || "",
+        };
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao parsear redes:", err);
+  }
+
+  links.instagram = links.instagram || dadosCompletos?.link_instagram || "";
+
+  links.soundcloud = links.soundcloud || dadosCompletos?.link_soundcloud || "";
+
+  links.spotify = links.spotify || dadosCompletos?.link_spotify || "";
+
+  links.geral = links.geral || dadosCompletos?.link_geral || "";
+
+  // =========================
+  // PAGE EDITAR
+  // =========================
+  if (modoEdicao) {
+    return (
+      <ModalEditarPerfil
+        usuarioLogado={dadosCompletos}
+        setUsuarioLogado={(novoUsuario) => {
+          setDadosCompletos(novoUsuario);
+
+          if (setUsuarioLogado) {
+            setUsuarioLogado(novoUsuario);
+          }
+        }}
+        voltar={() => setModoEdicao(false)}
+        onVoltar={() => setModoEdicao(false)}
+        onFechar={() => setModoEdicao(false)}
+      />
+    );
+  }
+
+  // =========================
   // UI
   // =========================
   return (
-    <div
-      style={{
-        padding: "40px 20px",
-        maxWidth: "1000px",
-        margin: "0 auto",
-        color: "#fff",
-        paddingBottom: "100px",
-      }}
-    >
-      {/* HEADER */}
-      <div
-        style={{
-          background: "#050505",
-          padding: "40px",
-          borderRadius: "16px",
-          border: "1px solid #1a1a1a",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: "20px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "30px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <img
-            src={
-              dadosCompletos?.foto_perfil || "https://via.placeholder.com/150"
-            }
-            alt="Perfil"
-            style={{
-              width: "160px",
-              height: "160px",
-              borderRadius: "8px",
-              objectFit: "cover",
-              border: "2px solid #ff003c",
-            }}
-          />
+    <div className="meu-perfil-page">
+      {/* HERO */}
+      <div className="meu-perfil-hero">
+        <div className="meu-perfil-overlay"></div>
 
-          <div>
-            <h2
-              className="fonte-quadrada"
-              style={{
-                fontSize: "3rem",
-                margin: 0,
-                textTransform: "uppercase",
-              }}
-            >
+        <div className="meu-perfil-top">
+          {/* FOTO */}
+          <div className="meuperfil-avatar-wrap">
+            <img
+              src={
+                dadosCompletos?.foto_perfil || "https://via.placeholder.com/300"
+              }
+              alt="Perfil"
+              className="meuperfil-avatar"
+            />
+
+            <div className="meuperfil-status-ring"></div>
+
+            <div className="meu-perfil-ring"></div>
+          </div>
+
+          {/* INFO */}
+          <div className="meu-perfil-info">
+            <span className="meu-perfil-mini-tag fonte-quadrada">
+              SEU PERFIL
+            </span>
+
+            <h1 className="meu-perfil-name fonte-quadrada">
               {dadosCompletos?.vulgo || "SEM VULGO"}
-            </h2>
+            </h1>
 
-            <p
-              className="fonte-texto"
-              style={{
-                color: "#888",
-                margin: "0 0 15px 0",
-                fontSize: "1.1rem",
-              }}
-            >
-              {dadosCompletos?.nome}
+            <p className="meu-perfil-realname fonte-texto">
+              {dadosCompletos?.nome || "Usuário"}
             </p>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                flexWrap: "wrap",
-                marginBottom: "15px",
-              }}
-            >
-              {listaTags.map((f, i) => (
-                <span
-                  key={i}
-                  className="fonte-quadrada"
-                  style={{
-                    background: "#1a1a1a",
-                    padding: "4px 10px",
-                    borderRadius: "4px",
-                    fontSize: "0.7rem",
-                    color: "#ff003c",
-                    border: "1px solid #ff003c",
-                  }}
-                >
-                  {f.trim().toUpperCase()}
+            {/* TAGS */}
+            <div className="meu-perfil-tags">
+              {listaFuncoes.map((funcao, index) => (
+                <span key={index} className="meu-perfil-tag fonte-quadrada">
+                  {funcao.toUpperCase()}
                 </span>
               ))}
             </div>
 
-            <p
-              className="fonte-texto"
-              style={{
-                color: "#ccc",
-                maxWidth: "500px",
-                lineHeight: "1.5",
-                marginBottom: "20px",
-                fontSize: "0.95rem",
-              }}
-            >
+            {/* BIO */}
+            <p className="meu-perfil-bio fonte-texto">
               {dadosCompletos?.bio || "Sem biografia definida."}
             </p>
 
-            {/* REDES (Com as cores restauradas) */}
-            <div style={{ display: "flex", gap: "20px" }}>
+            {/* REDES */}
+            <div className="meu-perfil-socials">
               {links.instagram && (
                 <a
                   href={links.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="meu-perfil-social"
                 >
-                  <FaInstagram size={26} />
+                  <FaInstagram />
                 </a>
               )}
+
               {links.soundcloud && (
                 <a
                   href={links.soundcloud}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="meu-perfil-social"
                 >
-                  <FaSoundcloud size={26} />
+                  <FaSoundcloud />
                 </a>
               )}
+
               {links.spotify && (
                 <a
                   href={links.spotify}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#1DB954")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="meu-perfil-social spotify"
                 >
-                  <FaSpotify size={26} />
+                  <FaSpotify />
                 </a>
               )}
+
               {links.geral && (
                 <a
                   href={links.geral}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#888", transition: "0.3s" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#ff003c")
-                  }
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#888")}
+                  className="meu-perfil-social"
                 >
-                  <SiLinktree size={24} />
+                  <SiLinktree />
                 </a>
               )}
             </div>
           </div>
+
+          {/* BOTÃO */}
+          <button
+            className="meu-perfil-edit-btn fonte-quadrada"
+            onClick={() => setModoEdicao(true)}
+          >
+            ✦ EDITAR PERFIL
+          </button>
+        </div>
+      </div>
+
+      {/* STATS */}
+      <div className="meu-perfil-stats">
+        <div className="meu-perfil-stat-card">
+          <span className="meu-perfil-stat-number fonte-quadrada">
+            {eventosProdutor.length}
+          </span>
+
+          <span className="meu-perfil-stat-label fonte-texto">PRODUÇÕES</span>
         </div>
 
-        {/* BOTÃO */}
-        <button
-          onClick={() => setModoEdicao(true)}
-          className="fonte-quadrada"
-          style={{
-            background: "transparent",
-            color: "#ff003c",
-            border: "1px solid #ff003c",
-            padding: "10px 20px",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "0.8rem",
-          }}
-        >
-          EDITAR PERFIL
-        </button>
+        <div className="meu-perfil-stat-card">
+          <span className="meu-perfil-stat-number fonte-quadrada">
+            {eventosLineup.length}
+          </span>
+
+          <span className="meu-perfil-stat-label fonte-texto">LINEUPS</span>
+        </div>
+
+        <div className="meu-perfil-stat-card">
+          <span className="meu-perfil-stat-number fonte-quadrada">
+            {eventosInteressado.length}
+          </span>
+
+          <span className="meu-perfil-stat-label fonte-texto">PRESENÇAS</span>
+        </div>
       </div>
 
       {/* ABAS */}
-      <div
-        style={{
-          display: "flex",
-          gap: "40px",
-          marginTop: "40px",
-          borderBottom: "1px solid #1a1a1a",
-        }}
-      >
-        {["produtor", "lineup", "interessado"].map((aba) => (
-          <button
-            key={aba}
-            onClick={() => setAbaEventos(aba)}
-            className="fonte-quadrada"
-            style={{
-              ...abaStyle,
-              color: abaEventos === aba ? "#ff003c" : "#666",
-              borderBottom:
-                abaEventos === aba
-                  ? "2px solid #ff003c"
-                  : "2px solid transparent",
-            }}
-          >
-            {aba.toUpperCase()} (
-            {aba === "produtor"
-              ? eventosProdutor.length
-              : aba === "lineup"
-                ? eventosLineup.length
-                : eventosInteressado.length}
-            )
-          </button>
-        ))}
+      <div className="meu-perfil-tabs">
+        <button
+          onClick={() => setAbaEventos("produtor")}
+          className={`meu-perfil-tab fonte-quadrada ${
+            abaEventos === "produtor" ? "active" : ""
+          }`}
+        >
+          PRODUÇÕES
+        </button>
+
+        <button
+          onClick={() => setAbaEventos("lineup")}
+          className={`meu-perfil-tab fonte-quadrada ${
+            abaEventos === "lineup" ? "active" : ""
+          }`}
+        >
+          APARIÇÕES
+        </button>
+
+        <button
+          onClick={() => setAbaEventos("interessado")}
+          className={`meu-perfil-tab fonte-quadrada ${
+            abaEventos === "interessado" ? "active" : ""
+          }`}
+        >
+          PRESENÇA
+        </button>
       </div>
 
       {/* EVENTOS */}
-      <div style={{ marginTop: "30px" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          {eventosExibidos.length === 0 ? (
-            <p style={{ color: "#444" }}>Nenhum evento encontrado.</p>
-          ) : (
-            eventosExibidos.map((e) => (
-              <div
-                key={e.id}
-                style={{
-                  background: "#0a0a0a",
-                  padding: "20px",
-                  borderRadius: "12px",
-                  border: "1px solid #1a1a1a",
-                }}
-              >
-                <h4 className="fonte-quadrada" style={{ color: "#ff003c" }}>
-                  {e.titulo}
-                </h4>
-                <p className="fonte-texto">📍 {e.local}</p>
-              </div>
-            ))
-          )}
-        </div>
+      <div className="meu-perfil-events-grid">
+        {eventosExibidos.length === 0 ? (
+          <div className="meu-perfil-empty">
+            <p className="fonte-texto">
+              Nenhum evento encontrado nesta categoria.
+            </p>
+          </div>
+        ) : (
+          eventosExibidos.map((evento) => (
+            <div key={evento.id} className="meu-perfil-event-card">
+              <div className="meu-perfil-event-glow"></div>
+
+              <h3 className="fonte-quadrada">{evento.titulo}</h3>
+
+              <p className="fonte-texto">
+                📍 {evento.local || "Local indefinido"}
+              </p>
+
+              <span className="fonte-texto">
+                📅{" "}
+                {evento.data_hora
+                  ? new Date(evento.data_hora).toLocaleDateString("pt-BR")
+                  : "Sem data"}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
