@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
+
+import "./ModalCriarEvento.css";
 
 function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
   const [novoEvento, setNovoEvento] = useState({
@@ -17,6 +20,7 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const dataPrincipal =
         novoEvento.tipo_evento === "festival" &&
@@ -32,19 +36,25 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
 
       const resposta = await fetch("http://localhost:3000/api/eventos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(dadosParaEnviar),
       });
 
       if (resposta.ok) {
-        alert("🔥 Evento adicionado ao line-up!");
+        toast.success("Evento lançado na cena 🔥");
+
         onEventoCriado();
+
         fecharModal();
       } else {
-        alert("Erro ao criar o evento. Verifique o terminal do servidor.");
+        toast.error("Erro ao criar evento.");
       }
     } catch (erro) {
-      console.error("Erro na conexão", erro);
+      console.error(erro);
+
+      toast.error("Erro de conexão.");
     }
   };
 
@@ -53,178 +63,203 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
       ...novoEvento,
       programacao: [
         ...novoEvento.programacao,
-        { data: "", lineup: "", valor: "" },
+        {
+          data: "",
+          lineup: "",
+          valor: "",
+        },
       ],
     });
   };
 
   const removerDia = (index) => {
     const filtrados = novoEvento.programacao.filter((_, i) => i !== index);
-    setNovoEvento({ ...novoEvento, programacao: filtrados });
+
+    setNovoEvento({
+      ...novoEvento,
+      programacao: filtrados,
+    });
   };
 
   const atualizarDia = (index, campo, valor) => {
     const novosDias = [...novoEvento.programacao];
+
     novosDias[index][campo] = valor;
-    setNovoEvento({ ...novoEvento, programacao: novosDias });
+
+    setNovoEvento({
+      ...novoEvento,
+      programacao: novosDias,
+    });
   };
 
   return (
-    <div className="modal-overlay">
-      <div
-        className="modal-box"
-        style={{ width: "500px", maxHeight: "90vh", overflowY: "auto" }}
-      >
-        <h2
-          className="fonte-quadrada"
-          style={{ marginBottom: "20px", color: "#fff" }}
-        >
-          LANÇAR EVENTO
-        </h2>
+    <div className="evento-modal-overlay">
+      <div className="evento-modal">
+        {/* HEADER */}
+        <div className="evento-modal-header">
+          <div>
+            <span className="evento-modal-mini fonte-quadrada">
+              NOVO EVENTO
+            </span>
 
-        <form onSubmit={handleSubmit}>
-          {/* BLOCO 1: NOME, LOCAL E TIPO */}
-          <input
-            type="text"
-            placeholder="NOME DO EVENTO"
-            className="input-bruto fonte-texto"
-            required
-            value={novoEvento.titulo}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, titulo: e.target.value })
-            }
-          />
+            <h2 className="evento-modal-title fonte-quadrada">
+              LANÇAR NA CENA
+            </h2>
+          </div>
 
-          <input
-            type="text"
-            placeholder="LOCAL (EX: SUB DULCINA)"
-            className="input-bruto fonte-texto"
-            required
-            value={novoEvento.local}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, local: e.target.value })
-            }
-          />
+          <button className="evento-modal-close" onClick={fecharModal}>
+            ✕
+          </button>
+        </div>
 
-          <select
-            className="input-bruto fonte-texto"
-            value={novoEvento.tipo_evento}
-            onChange={(e) => {
-              const tipo = e.target.value;
-              let prog = [...novoEvento.programacao];
-              if (tipo === "festival" && prog.length === 0) {
-                prog = [
-                  {
-                    data: novoEvento.data_hora,
-                    lineup: novoEvento.lista_artistas,
-                    valor: "",
-                  },
-                ];
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="evento-form">
+          {/* NOME */}
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">
+              NOME DO EVENTO
+            </label>
+
+            <input
+              type="text"
+              placeholder="Ex: SUBWORLD"
+              className="evento-input fonte-texto"
+              required
+              value={novoEvento.titulo}
+              onChange={(e) =>
+                setNovoEvento({
+                  ...novoEvento,
+                  titulo: e.target.value,
+                })
               }
-              setNovoEvento({
-                ...novoEvento,
-                tipo_evento: tipo,
-                programacao: prog,
-              });
-            }}
-          >
-            <option value="unico">DIA ÚNICO / CLUB</option>
-            <option value="festival">FESTIVAL (MÚLTIPLOS DIAS)</option>
-          </select>
+            />
+          </div>
 
-          {/* BLOCO 2: DATA (SÓ APARECE SE FOR EVENTO ÚNICO) */}
+          {/* LOCAL */}
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">LOCAL</label>
+
+            <input
+              type="text"
+              placeholder="Ex: SUB DULCINA"
+              className="evento-input fonte-texto"
+              required
+              value={novoEvento.local}
+              onChange={(e) =>
+                setNovoEvento({
+                  ...novoEvento,
+                  local: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          {/* TIPO */}
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">FORMATO</label>
+
+            <select
+              className="evento-input fonte-texto"
+              value={novoEvento.tipo_evento}
+              onChange={(e) => {
+                const tipo = e.target.value;
+
+                let prog = [...novoEvento.programacao];
+
+                if (tipo === "festival" && prog.length === 0) {
+                  prog = [
+                    {
+                      data: "",
+                      lineup: "",
+                      valor: "",
+                    },
+                  ];
+                }
+
+                setNovoEvento({
+                  ...novoEvento,
+                  tipo_evento: tipo,
+                  programacao: prog,
+                });
+              }}
+            >
+              <option value="unico">DIA ÚNICO / CLUB</option>
+
+              <option value="festival">FESTIVAL / MÚLTIPLOS DIAS</option>
+            </select>
+          </div>
+
+          {/* DATA */}
           {novoEvento.tipo_evento === "unico" && (
-            <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
-              <div style={{ flex: 1 }}>
-                <label
-                  className="fonte-texto"
-                  style={{ color: "#aaa", fontSize: "0.7rem" }}
-                >
-                  DATA E HORA DO ROLÊ:
-                </label>
-                <input
-                  type="datetime-local"
-                  className="input-bruto fonte-texto"
-                  required
-                  value={novoEvento.data_hora}
-                  style={{ colorScheme: "dark" }}
-                  onChange={(e) =>
-                    setNovoEvento({ ...novoEvento, data_hora: e.target.value })
-                  }
-                />
-              </div>
+            <div className="evento-field">
+              <label className="evento-label fonte-quadrada">DATA E HORA</label>
+
+              <input
+                type="datetime-local"
+                className="evento-input fonte-texto"
+                required
+                style={{ colorScheme: "dark" }}
+                value={novoEvento.data_hora}
+                onChange={(e) =>
+                  setNovoEvento({
+                    ...novoEvento,
+                    data_hora: e.target.value,
+                  })
+                }
+              />
             </div>
           )}
 
-          {/* BLOCO 3: CRONOGRAMA DO FESTIVAL */}
+          {/* FESTIVAL */}
           {novoEvento.tipo_evento === "festival" && (
-            <div
-              style={{
-                marginTop: "15px",
-                borderTop: "1px solid #222",
-                paddingTop: "15px",
-                background: "#0a0a0a",
-                padding: "10px",
-                borderRadius: "4px",
-              }}
-            >
-              <h4
-                className="fonte-quadrada"
-                style={{
-                  color: "#ff003c",
-                  marginBottom: "10px",
-                  fontSize: "0.8rem",
-                }}
-              >
-                DIAS DO FESTIVAL
-              </h4>
+            <div className="evento-festival-box">
+              <div className="evento-festival-top">
+                <h3 className="fonte-quadrada">DIAS DO FESTIVAL</h3>
+
+                <button
+                  type="button"
+                  className="evento-add-day fonte-quadrada"
+                  onClick={adicionarDia}
+                >
+                  + ADICIONAR DIA
+                </button>
+              </div>
 
               {novoEvento.programacao.map((dia, index) => (
-                <div
-                  key={index}
-                  style={{
-                    marginBottom: "15px",
-                    padding: "10px",
-                    border: "1px dashed #333",
-                    position: "relative",
-                  }}
-                >
-                  <label
-                    className="fonte-texto"
-                    style={{ color: "#666", fontSize: "0.6rem" }}
+                <div key={index} className="evento-dia-card">
+                  <button
+                    type="button"
+                    className="evento-remove-day"
+                    onClick={() => removerDia(index)}
                   >
-                    DATA E HORA DO DIA {index + 1}:
-                  </label>
-                  <input
-                    type="datetime-local"
-                    className="input-bruto fonte-texto"
-                    style={{ colorScheme: "dark" }}
-                    required
-                    value={dia.data}
-                    onChange={(e) =>
-                      atualizarDia(index, "data", e.target.value)
-                    }
-                  />
+                    ✕
+                  </button>
 
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "2fr 1fr",
-                      gap: "10px",
-                      marginTop: "5px",
-                    }}
-                  >
-                    <div>
-                      <label
-                        className="fonte-texto"
-                        style={{ color: "#666", fontSize: "0.6rem" }}
-                      >
-                        ARTISTAS / LINE-UP:
+                  <div className="evento-field">
+                    <label className="evento-label fonte-quadrada">DATA</label>
+
+                    <input
+                      type="datetime-local"
+                      className="evento-input fonte-texto"
+                      style={{ colorScheme: "dark" }}
+                      required
+                      value={dia.data}
+                      onChange={(e) =>
+                        atualizarDia(index, "data", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="evento-grid">
+                    <div className="evento-field">
+                      <label className="evento-label fonte-quadrada">
+                        LINE-UP
                       </label>
+
                       <input
                         type="text"
-                        placeholder="Ex: DJ A, DJ B"
-                        className="input-bruto fonte-texto"
+                        placeholder="DJ A, DJ B..."
+                        className="evento-input fonte-texto"
                         required
                         value={dia.lineup}
                         onChange={(e) =>
@@ -232,163 +267,149 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
                         }
                       />
                     </div>
-                    <div>
-                      <label
-                        className="fonte-texto"
-                        style={{ color: "#666", fontSize: "0.6rem" }}
-                      >
-                        VALOR DIA (R$):
+
+                    <div className="evento-field">
+                      <label className="evento-label fonte-quadrada">
+                        VALOR
                       </label>
+
                       <input
                         type="number"
                         step="0.01"
-                        placeholder="Ex: 40"
-                        className="input-bruto fonte-texto"
-                        value={dia.valor || ""}
+                        placeholder="40"
+                        className="evento-input fonte-texto"
+                        value={dia.valor}
                         onChange={(e) =>
                           atualizarDia(index, "valor", e.target.value)
                         }
                       />
                     </div>
                   </div>
-
-                  {/* A MÁGICA AQUI: Se tiver mais de 1 dia na lista, qualquer dia pode ser apagado! */}
-                  {novoEvento.programacao.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removerDia(index)}
-                      style={{
-                        position: "absolute",
-                        top: "5px",
-                        right: "5px",
-                        background: "transparent",
-                        border: "none",
-                        color: "#ff003c",
-                        cursor: "pointer",
-                        fontSize: "1.2rem",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      ✕
-                    </button>
-                  )}
                 </div>
               ))}
-
-              <button
-                type="button"
-                className="fonte-quadrada"
-                onClick={adicionarDia}
-                style={{
-                  background: "#222",
-                  color: "#fff",
-                  border: "1px dashed #444",
-                  width: "100%",
-                  padding: "10px",
-                  cursor: "pointer",
-                  fontSize: "0.7rem",
-                }}
-              >
-                + ADICIONAR PRÓXIMO DIA
-              </button>
             </div>
           )}
 
-          {/* BLOCO 4: LINKS, FLYER, VALOR GERAL E INFOS */}
-          <input
-            type="url"
-            placeholder="URL DO FLYER (Imagem)"
-            className="input-bruto fonte-texto"
-            style={{ marginTop: "15px" }}
-            value={novoEvento.imagem_url}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, imagem_url: e.target.value })
-            }
-          />
+          {/* GRID */}
+          <div className="evento-grid">
+            <div className="evento-field">
+              <label className="evento-label fonte-quadrada">GÊNEROS</label>
 
-          <input
-            type="url"
-            placeholder="LOCALIZAÇÃO (Link do Google Maps)"
-            className="input-bruto fonte-texto"
-            value={novoEvento.localizacao_url}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, localizacao_url: e.target.value })
-            }
-          />
+              <input
+                type="text"
+                placeholder="UKG, HARD..."
+                className="evento-input fonte-texto"
+                value={novoEvento.generos}
+                onChange={(e) =>
+                  setNovoEvento({
+                    ...novoEvento,
+                    generos: e.target.value,
+                  })
+                }
+              />
+            </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "10px",
-              marginTop: "5px",
-            }}
-          >
+            <div className="evento-field">
+              <label className="evento-label fonte-quadrada">VALOR</label>
+
+              <input
+                type="number"
+                step="0.01"
+                placeholder="R$"
+                className="evento-input fonte-texto"
+                value={novoEvento.valor}
+                onChange={(e) =>
+                  setNovoEvento({
+                    ...novoEvento,
+                    valor: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          {/* LINKS */}
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">FLYER</label>
+
             <input
-              type="text"
-              placeholder="GÊNEROS (Ex: UKG, Hard)"
-              className="input-bruto fonte-texto"
-              value={novoEvento.generos}
+              type="url"
+              placeholder="URL da imagem"
+              className="evento-input fonte-texto"
+              value={novoEvento.imagem_url}
               onChange={(e) =>
-                setNovoEvento({ ...novoEvento, generos: e.target.value })
-              }
-            />
-
-            <input
-              type="number"
-              step="0.01"
-              placeholder={
-                novoEvento.tipo_evento === "festival"
-                  ? "VALOR DO PASSAPORTE (R$)"
-                  : "VALOR INGRESSO (R$)"
-              }
-              className="input-bruto fonte-texto"
-              value={novoEvento.valor}
-              onChange={(e) =>
-                setNovoEvento({ ...novoEvento, valor: e.target.value })
+                setNovoEvento({
+                  ...novoEvento,
+                  imagem_url: e.target.value,
+                })
               }
             />
           </div>
 
-          <input
-            type="url"
-            placeholder="LINK DO INGRESSO / SHOTGUN"
-            className="input-bruto fonte-texto"
-            value={novoEvento.link_ingresso}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, link_ingresso: e.target.value })
-            }
-          />
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">GOOGLE MAPS</label>
 
-          <textarea
-            placeholder="LINE-UP GERAL (Artistas separados por vírgula)"
-            className="input-bruto fonte-texto"
-            style={{ height: "80px", paddingTop: "10px" }}
-            required
-            value={novoEvento.lista_artistas}
-            onChange={(e) =>
-              setNovoEvento({ ...novoEvento, lista_artistas: e.target.value })
-            }
-          />
+            <input
+              type="url"
+              placeholder="Link da localização"
+              className="evento-input fonte-texto"
+              value={novoEvento.localizacao_url}
+              onChange={(e) =>
+                setNovoEvento({
+                  ...novoEvento,
+                  localizacao_url: e.target.value,
+                })
+              }
+            />
+          </div>
 
-          <div
-            className="modal-btns"
-            style={{ display: "flex", gap: "10px", marginTop: "15px" }}
-          >
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">LINK INGRESSO</label>
+
+            <input
+              type="url"
+              placeholder="Shotgun / Sympla..."
+              className="evento-input fonte-texto"
+              value={novoEvento.link_ingresso}
+              onChange={(e) =>
+                setNovoEvento({
+                  ...novoEvento,
+                  link_ingresso: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          {/* LINEUP */}
+          <div className="evento-field">
+            <label className="evento-label fonte-quadrada">LINE-UP GERAL</label>
+
+            <textarea
+              placeholder="Artistas separados por vírgula..."
+              className="evento-textarea fonte-texto"
+              required
+              value={novoEvento.lista_artistas}
+              onChange={(e) =>
+                setNovoEvento({
+                  ...novoEvento,
+                  lista_artistas: e.target.value,
+                })
+              }
+            />
+          </div>
+
+          {/* BOTÕES */}
+          <div className="evento-actions">
             <button
               type="button"
-              className="btn-acao fonte-quadrada"
-              style={{ background: "#333" }}
+              className="evento-cancel fonte-quadrada"
               onClick={fecharModal}
             >
               CANCELAR
             </button>
-            <button
-              type="submit"
-              className="btn-acao fonte-quadrada"
-              style={{ background: "#ff003c" }}
-            >
-              GRAVAR EVENTO
+
+            <button type="submit" className="evento-submit fonte-quadrada">
+              PUBLICAR EVENTO
             </button>
           </div>
         </form>

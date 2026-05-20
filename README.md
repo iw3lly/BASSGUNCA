@@ -1,44 +1,172 @@
-# Bassgunça 🎛️
+# Bassgunça 🎛️🔥
 
-Plataforma dedicada à cena underground, conectando DJs, produtores, artistas e o público.
+Plataforma voltada para a cena underground brasileira, conectando DJs, produtores, coletivos, artistas e o público em um único ambiente digital.
 
-Este repositório contém tanto a API (Back-end) quanto a Interface (Front-end) do projeto. Siga os passos abaixo para rodar a aplicação localmente.
+O sistema permite divulgação de eventos, criação de perfis artísticos, feed social da cena, gerenciamento de line-ups e interação entre usuários.
 
-## 🛠️ Tecnologias Utilizadas
+---
 
-- **Front-end:** React (Vite/CRA)
-- **Back-end:** Node.js + Express
-- **Banco de Dados:** MySQL
+# ✨ Funcionalidades
 
-## ⚙️ Como rodar o projeto
+## 👤 Usuários
 
-Você precisará de dois terminais abertos para rodar o Back-end e o Front-end simultaneamente.
+- Login e autenticação
+- Perfil personalizado
+- Edição de informações e redes sociais
+- Visualização de perfis públicos
 
-### 1. Rodando o Back-end (API)
+## 🎫 Eventos
 
-Abra o primeiro terminal na pasta raiz do projeto (`BASSGUNCA`) e instale as dependências (caso seja a primeira vez):
+- Criação de eventos
+- Edição e exclusão
+- Sistema de interesse/presença
+- Eventos únicos e festivais multi-day
+- Eventos encerrados automaticamente
 
+## 📰 Feed Social
+
+- Publicação de posts
+- Edição de publicações
+- Exclusão de posts
+- Integração com perfis
+
+## 🎧 Artistas
+
+- Página de artistas da cena
+- Busca por participantes de eventos
+- Integração com line-ups
+
+---
+
+# 🛠️ Tecnologias Utilizadas
+
+## Front-end
+
+- React
+- Vite
+- CSS3
+- Framer Motion
+- React Hot Toast
+- React Icons
+
+## Back-end
+
+- Node.js
+- Express
+
+## Banco de Dados
+
+- MySQL
+
+---
+
+# 📁 Estrutura do Projeto
+
+```bash
+BASSGUNCA/
+├── bassgunca-front/   # Front-end React
+├── src/               # API Node/Express
+├── database/          # Scripts SQL
+├── uploads/           # Arquivos enviados
+└── README.md
+```
+
+---
+
+# ⚙️ Como rodar o projeto
+
+Você precisará de dois terminais abertos.
+
+---
+
+# 🚀 1. Rodando o Back-end
+
+Na raiz do projeto:
+
+```bash
 npm install
+```
 
-Inicie o servidor local:
+Inicie o servidor:
 
+```bash
 npx nodemon src/server.js
+```
 
-_(O servidor deverá rodar na porta 3000)._
+Servidor padrão:
 
-### 2. Rodando o Front-end (React)
+```bash
+http://localhost:3000
+```
 
-Abra um segundo terminal, entre na pasta do front-end e instale as dependências:
+---
 
+# 💻 2. Rodando o Front-end
+
+Abra outro terminal:
+
+```bash
 cd bassgunca-front
 npm install
-
-Inicie a interface:
-
 npm run dev
+```
 
-_(Acesse no seu navegador através do localhost indicado no terminal)._
+Acesse:
 
-## 🗄️ Banco de Dados
+```bash
+http://localhost:5173
+```
 
-Certifique-se de que o seu serviço MySQL (XAMPP, WAMP, Docker, etc.) está rodando antes de iniciar a API. O arquivo `.env` na raiz do projeto deve conter as credenciais de acesso ao seu banco local.
+---
+
+# 🗄️ Banco de Dados
+
+Certifique-se de que o MySQL esteja ativo.
+
+Exemplos:
+
+- XAMPP
+- WAMP
+- Docker
+- Laragon
+
+O arquivo `.env` deve conter:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=bassgunca
+DB_PORT=3306
+```
+
+---
+
+# 📸 Preview
+
+## Home
+
+Interface principal da plataforma com feed e eventos.
+
+## Perfil
+
+Perfis personalizados para artistas e produtores.
+
+## Eventos
+
+Sistema de divulgação underground com line-up e presença.
+
+---
+
+# 🎯 Objetivo do Projeto
+
+O Bassgunça foi desenvolvido com foco em fortalecer a cena underground local, oferecendo uma plataforma independente para divulgação de artistas, eventos e coletivos.
+
+---
+
+# 👨‍💻 Desenvolvido por
+
+Wellyngton Santos
+
+GitHub:
+https://github.com/iw3lly

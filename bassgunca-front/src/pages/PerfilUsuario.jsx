@@ -2,6 +2,8 @@ import React, { useMemo, useState } from "react";
 import { FaInstagram, FaSoundcloud, FaSpotify } from "react-icons/fa";
 import { SiLinktree } from "react-icons/si";
 
+import { eventoEncerrado } from "../utils/eventoStatus";
+
 import "./PerfilUsuario.css";
 
 function PerfilUsuario({
@@ -46,7 +48,7 @@ function PerfilUsuario({
   // EVENTOS
   // =========================
 
-  // EVENTOS PRODUZIDOS
+  // PRODUZIDOS
   const eventosProdutor = useMemo(() => {
     return eventos.filter((e) => {
       const criador = String(e?.criado_por || "")
@@ -57,7 +59,7 @@ function PerfilUsuario({
     });
   }, [eventos, vulgoPerfil]);
 
-  // EVENTOS EM LINEUP
+  // LINEUP
   const eventosLineup = useMemo(() => {
     return eventos.filter((e) => {
       const artistas = String(
@@ -68,7 +70,7 @@ function PerfilUsuario({
     });
   }, [eventos, regexPalavraExata]);
 
-  // EVENTOS COM INTERESSE
+  // INTERESSADO
   const eventosInteressado = useMemo(() => {
     return eventos.filter((e) => {
       const interessados = String(e?.interessados || "")
@@ -88,6 +90,11 @@ function PerfilUsuario({
         ? eventosLineup
         : eventosInteressado;
 
+  // FUTUROS E ENCERRADOS
+  const eventosFuturos = eventosExibidos.filter((e) => !eventoEncerrado(e));
+
+  const eventosPassados = eventosExibidos.filter((e) => eventoEncerrado(e));
+
   // =========================
   // PERFIL PRÓPRIO
   // =========================
@@ -105,7 +112,7 @@ function PerfilUsuario({
     .filter(Boolean);
 
   // =========================
-  // REDES SOCIAIS
+  // REDES
   // =========================
   let links = {
     instagram: "",
@@ -120,17 +127,14 @@ function PerfilUsuario({
     if (rawRedes) {
       let parsed = rawRedes;
 
-      // JSON dentro de string
       if (typeof parsed === "string" && parsed.trim().startsWith('"')) {
         parsed = JSON.parse(parsed);
       }
 
-      // String JSON normal
       if (typeof parsed === "string" && parsed.trim().startsWith("{")) {
         parsed = JSON.parse(parsed);
       }
 
-      // Objeto
       if (typeof parsed === "object") {
         links = {
           instagram: parsed.instagram || parsed.link_instagram || "",
@@ -147,7 +151,7 @@ function PerfilUsuario({
     console.error("Erro ao parsear redes:", err);
   }
 
-  // fallback campos separados
+  // FALLBACK
   links.instagram = links.instagram || perfil?.link_instagram || "";
 
   links.soundcloud = links.soundcloud || perfil?.link_soundcloud || "";
@@ -158,7 +162,7 @@ function PerfilUsuario({
 
   return (
     <div className="perfil-page">
-      {/* BOTÃO VOLTAR */}
+      {/* VOLTAR */}
       <button onClick={onVoltar} className="perfil-back-btn fonte-quadrada">
         ← VOLTAR
       </button>
@@ -255,7 +259,7 @@ function PerfilUsuario({
             </div>
           </div>
 
-          {/* BOTÃO EDITAR */}
+          {/* EDITAR */}
           {ehMeuProprioPerfil && (
             <button
               className="perfil-edit-btn fonte-quadrada"
@@ -333,24 +337,68 @@ function PerfilUsuario({
             </p>
           </div>
         ) : (
-          eventosExibidos.map((evento) => (
-            <div key={evento.id} className="perfil-event-card">
-              <div className="perfil-event-glow"></div>
+          <>
+            {/* FUTUROS */}
+            {eventosFuturos.length > 0 && (
+              <>
+                <div className="perfil-section-title fonte-quadrada">
+                  PRÓXIMOS EVENTOS
+                </div>
 
-              <h3 className="fonte-quadrada">{evento.titulo}</h3>
+                {eventosFuturos.map((evento) => (
+                  <div key={evento.id} className="perfil-event-card">
+                    <div className="perfil-event-glow"></div>
 
-              <p className="fonte-texto">
-                📍 {evento.local || "Local indefinido"}
-              </p>
+                    <h3 className="fonte-quadrada">{evento.titulo}</h3>
 
-              <span className="fonte-texto">
-                📅{" "}
-                {evento.data_hora
-                  ? new Date(evento.data_hora).toLocaleDateString("pt-BR")
-                  : "Sem data"}
-              </span>
-            </div>
-          ))
+                    <p className="fonte-texto">
+                      📍 {evento.local || "Local indefinido"}
+                    </p>
+
+                    <span className="fonte-texto">
+                      📅{" "}
+                      {evento.data_hora
+                        ? new Date(evento.data_hora).toLocaleDateString("pt-BR")
+                        : "Sem data"}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* PASSADOS */}
+            {eventosPassados.length > 0 && (
+              <>
+                <div className="perfil-section-title encerrados fonte-quadrada">
+                  EVENTOS ENCERRADOS
+                </div>
+
+                {eventosPassados.map((evento) => (
+                  <div
+                    key={evento.id}
+                    className="perfil-event-card perfil-event-card-encerrado"
+                  >
+                    <div className="perfil-event-status encerrado">
+                      ENCERRADO
+                    </div>
+
+                    <h3 className="fonte-quadrada">{evento.titulo}</h3>
+
+                    <p className="fonte-texto">
+                      📍 {evento.local || "Local indefinido"}
+                    </p>
+
+                    <span className="fonte-texto">
+                      📅{" "}
+                      {evento.data_hora
+                        ? new Date(evento.data_hora).toLocaleDateString("pt-BR")
+                        : "Sem data"}
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+          </>
         )}
       </div>
     </div>

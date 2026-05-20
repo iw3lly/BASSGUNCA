@@ -386,6 +386,7 @@
   border-radius: 24px;
   padding: 24px;
   transition: 0.28s ease;
+  animation: fadeCardPerfil 0.35s ease;
 }
 
 .perfil-event-card:hover {
@@ -420,6 +421,85 @@
 }
 
 /* =========================
+   SEÇÕES DE EVENTOS
+========================= */
+
+.perfil-section-title {
+  grid-column: 1 / -1;
+
+  margin: 10px 0 2px;
+
+  color: #fff;
+
+  font-size: 1rem;
+
+  letter-spacing: 2px;
+
+  opacity: 0.9;
+}
+
+.perfil-section-title.encerrados {
+  color: #666;
+}
+
+/* =========================
+   EVENTO ENCERRADO
+========================= */
+
+.perfil-event-card-encerrado {
+  opacity: 0.58;
+
+  filter: grayscale(0.25);
+
+  border-color: #222;
+
+  background: linear-gradient(to bottom, #080808, #040404);
+}
+
+.perfil-event-card-encerrado:hover {
+  transform: none;
+
+  border-color: #2a2a2a;
+
+  box-shadow: none;
+}
+
+.perfil-event-card-encerrado .perfil-event-glow {
+  opacity: 0.25;
+}
+
+/* BADGE */
+
+.perfil-event-status {
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 0.62rem;
+
+  letter-spacing: 1px;
+
+  border: 1px solid;
+
+  z-index: 5;
+
+  backdrop-filter: blur(8px);
+}
+
+.perfil-event-status.encerrado {
+  color: #999;
+
+  border-color: #333;
+
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* =========================
    EMPTY
 ========================= */
 
@@ -431,6 +511,22 @@
   text-align: center;
   color: #555;
   background: rgba(255, 255, 255, 0.015);
+}
+
+/* =========================
+   ANIMAÇÕES
+========================= */
+
+@keyframes fadeCardPerfil {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================
