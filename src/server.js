@@ -230,3 +230,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando lindamente na porta ${PORT}`);
 });
+
+app.delete("/api/usuarios/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = "DELETE FROM usuarios WHERE id = ?";
+
+  pool.query(query, [id], (err, result) => {
+    if (err) {
+      console.error("Erro no banco ao deletar usuário:", err);
+      return res
+        .status(500)
+        .json({ error: "Erro ao excluir a conta do banco de dados." });
+    }
+
+    console.log(`[SISTEMA] Conta do usuário ID ${id} foi purgada com sucesso.`);
+    res.status(200).json({ message: "Conta excluída com sucesso!" });
+  });
+});

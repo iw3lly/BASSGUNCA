@@ -32,12 +32,40 @@ const Configuracoes = ({ usuarioLogado }) => {
     setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
   };
 
-  const handleExcluirConta = () => {
+  // 👇 FUNÇÃO DE EXCLUSÃO CORRIGIDA E CONECTADA À API 👇
+  const handleExcluirConta = async () => {
     const confirmar = window.confirm(
       "!!! ALERTA DO SISTEMA !!!\n\nA exclusão é irreversível. Todos os seus dados na cena serão apagados. Prosseguir?",
     );
-    if (confirmar)
-      alert("Acesso negado: Função bloqueada para a apresentação.");
+
+    if (confirmar) {
+      if (!usuarioLogado?.id) {
+        alert("Erro do sistema: Identificação do usuário não encontrada.");
+        return;
+      }
+
+      try {
+        const resposta = await fetch(
+          `http://localhost:3000/api/usuarios/${usuarioLogado.id}`,
+          {
+            method: "DELETE",
+          },
+        );
+
+        if (resposta.ok) {
+          alert("Sua conta foi purgada com sucesso do sistema.");
+          localStorage.removeItem("@bassgunca:user_session");
+          window.location.href = "/";
+        } else {
+          alert(
+            "Erro ao processar a exclusão no servidor. Verifique o terminal do backend.",
+          );
+        }
+      } catch (erro) {
+        console.error("Erro na requisição de deleção:", erro);
+        alert("Servidor offline ou falha na conexão.");
+      }
+    }
   };
 
   if (!usuarioLogado)
@@ -195,7 +223,7 @@ const Configuracoes = ({ usuarioLogado }) => {
           )}
         </section>
 
-        {/* BLOCO 2: PRIVACIDADE E RADAR (NOVO) */}
+        {/* BLOCO 2: PRIVACIDADE E RADAR */}
         <section
           className="bloco-config"
           style={{

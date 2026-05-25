@@ -3,15 +3,36 @@ import React, { useState } from "react";
 function MeusEventos({ eventos, usuarioLogado, setEventos }) {
   const [editando, setEditando] = useState(null);
 
-  // 1. Filtrar eventos do produtor
+  // ESPIÃO: Para vermos no terminal do navegador (F12) o que está a chegar
+  console.log("TODOS OS EVENTOS DA BASE DE DADOS:", eventos);
+  console.log("UTILIZADOR LOGADO:", usuarioLogado);
+
+  // 1. Filtrar eventos do produtor (LÓGICA SUPER BLINDADA)
   const meusEventos = (eventos || []).filter((e) => {
-    const criador = String(e.criado_por || "")
+    // TENTATIVA 1: Comparar pelo ID (A forma mais correta em base de dados)
+    // Verificamos se existe um usuario_id ou id_produtor no evento
+    const idEvento = String(e?.usuario_id || e?.id_produtor || "");
+    const idLogado = String(usuarioLogado?.id || "");
+
+    if (idEvento && idLogado && idEvento === idLogado) {
+      return true;
+    }
+
+    // TENTATIVA 2: Comparar pelo texto (Caso a BD só guarde o nome)
+    const criador = String(e?.criado_por || "")
       .trim()
       .toLowerCase();
-    const logado = String(usuarioLogado?.vulgo || usuarioLogado?.nome || "")
+    const logadoVulgo = String(usuarioLogado?.vulgo || "")
       .trim()
       .toLowerCase();
-    return criador === logado && logado !== "";
+    const logadoNome = String(usuarioLogado?.nome || "")
+      .trim()
+      .toLowerCase();
+
+    return (
+      (logadoVulgo && criador.includes(logadoVulgo)) ||
+      (logadoNome && criador.includes(logadoNome))
+    );
   });
 
   // 2. Verificar permissões

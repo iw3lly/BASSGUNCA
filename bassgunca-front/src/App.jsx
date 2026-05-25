@@ -418,6 +418,7 @@ function App() {
             }}
             onEventoCriado={carregarEventos}
             eventoSendoEditado={eventoSendoEditado}
+            usuarioLogado={usuarioLogado}
           />
         )}
       </div>

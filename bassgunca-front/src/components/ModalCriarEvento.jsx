@@ -31,6 +31,9 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
       const dadosParaEnviar = {
         ...novoEvento,
         data_hora: dataPrincipal,
+
+        id_produtor: usuarioLogado?.id,
+        usuario_id: usuarioLogado?.id,
         criado_por: usuarioLogado?.vulgo || usuarioLogado?.nome || "Anônimo",
       };
 
@@ -47,13 +50,13 @@ function ModalCriarEvento({ fecharModal, onEventoCriado, usuarioLogado }) {
 
         onEventoCriado();
 
-        fecharModal();
+        // Força o recarregamento pra garantir que a tela 'Meus Eventos' puxe os dados novos
+        window.location.reload();
       } else {
         toast.error("Erro ao criar evento.");
       }
     } catch (erro) {
       console.error(erro);
-
       toast.error("Erro de conexão.");
     }
   };
