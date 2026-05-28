@@ -12,16 +12,19 @@ function Feed({
   editarPostFeed,
 }) {
   const [editandoId, setEditandoId] = useState(null);
+
   const [textoEditado, setTextoEditado] = useState("");
 
   const iniciarEdicao = (post) => {
     setEditandoId(post.id);
+
     setTextoEditado(post.texto);
   };
 
   const salvarEdicao = async (id) => {
     if (textoEditado.trim() !== "") {
       await editarPostFeed(id, textoEditado);
+
       setEditandoId(null);
     }
   };
@@ -96,10 +99,32 @@ function Feed({
           </div>
         ) : (
           feed.map((p, index) => {
+            console.log("POST:", p);
+
+            // =====================================
+            // AUTOR
+            // =====================================
+
+            const autorPost = String(
+              p.autor_vulgo || p.autor || p.criado_por || "",
+            )
+              .trim()
+              .toLowerCase();
+
+            const vulgoUsuario = String(usuarioLogado?.vulgo || "")
+              .trim()
+              .toLowerCase();
+
+            const nomeUsuario = String(usuarioLogado?.nome || "")
+              .trim()
+              .toLowerCase();
+
+            // =====================================
+            // DONO DO POST
+            // =====================================
+
             const isDono =
-              usuarioLogado &&
-              (usuarioLogado.vulgo === p.autor_vulgo ||
-                usuarioLogado.nome === p.autor_vulgo);
+              autorPost === vulgoUsuario || autorPost === nomeUsuario;
 
             return (
               <article
@@ -116,15 +141,24 @@ function Feed({
                 <div className="feed-card-top">
                   <div className="feed-user">
                     <div className="feed-avatar fonte-quadrada">
-                      {p.autor_vulgo?.charAt(0)?.toUpperCase()}
+                      {(p.autor_vulgo || p.autor || p.criado_por || "?")
+                        ?.charAt(0)
+                        ?.toUpperCase()}
                     </div>
 
                     <div>
                       <h3
                         className="fonte-quadrada"
-                        onClick={() => abrirPerfilUsuario(p.autor_vulgo)}
+                        onClick={() =>
+                          abrirPerfilUsuario(
+                            p.autor_vulgo || p.autor || p.criado_por,
+                          )
+                        }
+                        style={{
+                          cursor: "pointer",
+                        }}
                       >
-                        @{p.autor_vulgo}
+                        @{p.autor_vulgo || p.autor || p.criado_por}
                       </h3>
 
                       <p className="fonte-texto">
@@ -149,6 +183,7 @@ function Feed({
                     </div>
                   </div>
 
+                  {/* AÇÕES */}
                   {isDono && (
                     <div className="feed-actions">
                       {editandoId !== p.id && (
@@ -167,7 +202,7 @@ function Feed({
                   )}
                 </div>
 
-                {/* conteúdo */}
+                {/* CONTEÚDO */}
                 {editandoId === p.id ? (
                   <div className="feed-edit-box">
                     <textarea

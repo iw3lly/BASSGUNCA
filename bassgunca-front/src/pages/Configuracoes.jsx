@@ -1,382 +1,369 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+import "./Configuracoes.css";
 
 const Configuracoes = ({ usuarioLogado }) => {
-  // Estados para simular as configurações na tela
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
-  const [mensagem, setMensagem] = useState({ tipo: "", texto: "" });
 
-  // Estados dos novos módulos (Simulação para o Front-end)
-  const [radarLineup, setRadarLineup] = useState(true);
-  const [radarEventos, setRadarEventos] = useState(true);
-  const [modoFantasma, setModoFantasma] = useState(false);
+  const [mensagem, setMensagem] = useState({
+    tipo: "",
+    texto: "",
+  });
+
+  const [preferencias, setPreferencias] = useState({
+    radarLineup: true,
+    radarEventos: true,
+    modoFantasma: false,
+    autoplayVideos: true,
+    temaVermelho: true,
+    mostrarPerfilPublico: true,
+  });
+
+  useEffect(() => {
+    const salvas = localStorage.getItem("@bassgunca:config");
+
+    if (salvas) {
+      setPreferencias(JSON.parse(salvas));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("@bassgunca:config", JSON.stringify(preferencias));
+  }, [preferencias]);
+
+  const toggle = (campo) => {
+    setPreferencias((prev) => ({
+      ...prev,
+      [campo]: !prev[campo],
+    }));
+  };
 
   const handleAlterarSenha = async (e) => {
     e.preventDefault();
+
+    if (!senhaAtual || !novaSenha || !confirmarSenha) {
+      setMensagem({
+        tipo: "erro",
+        texto: "Preencha todos os campos.",
+      });
+
+      return;
+    }
+
     if (novaSenha !== confirmarSenha) {
-      setMensagem({ tipo: "erro", texto: "ERRO: AS SENHAS NÃO CONFEREM." });
+      setMensagem({
+        tipo: "erro",
+        texto: "As senhas não coincidem.",
+      });
+
       return;
     }
-    if (!senhaAtual || !novaSenha) {
-      setMensagem({ tipo: "erro", texto: "ERRO: PARÂMETROS AUSENTES." });
-      return;
+
+    try {
+      const resposta = await fetch(
+        `http://localhost:3000/api/usuarios/${usuarioLogado.id}/senha`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            senhaAtual,
+            novaSenha,
+          }),
+        },
+      );
+
+      if (resposta.ok) {
+        setMensagem({
+          tipo: "sucesso",
+          texto: "Senha atualizada com sucesso.",
+        });
+
+        setSenhaAtual("");
+        setNovaSenha("");
+        setConfirmarSenha("");
+      } else {
+        setMensagem({
+          tipo: "erro",
+          texto: "Erro ao atualizar senha.",
+        });
+      }
+    } catch (err) {
+      setMensagem({
+        tipo: "erro",
+        texto: "Erro de conexão.",
+      });
     }
-    setMensagem({
-      tipo: "sucesso",
-      texto: "SISTEMA: CREDENCIAIS ATUALIZADAS COM SUCESSO.",
-    });
-    setSenhaAtual("");
-    setNovaSenha("");
-    setConfirmarSenha("");
-    setTimeout(() => setMensagem({ tipo: "", texto: "" }), 4000);
+
+    setTimeout(() => {
+      setMensagem({
+        tipo: "",
+        texto: "",
+      });
+    }, 4000);
   };
 
-  // 👇 FUNÇÃO DE EXCLUSÃO CORRIGIDA E CONECTADA À API 👇
   const handleExcluirConta = async () => {
     const confirmar = window.confirm(
-      "!!! ALERTA DO SISTEMA !!!\n\nA exclusão é irreversível. Todos os seus dados na cena serão apagados. Prosseguir?",
+      "Tem certeza que deseja excluir sua conta?",
     );
 
-    if (confirmar) {
-      if (!usuarioLogado?.id) {
-        alert("Erro do sistema: Identificação do usuário não encontrada.");
-        return;
-      }
+    if (!confirmar) return;
 
-      try {
-        const resposta = await fetch(
-          `http://localhost:3000/api/usuarios/${usuarioLogado.id}`,
-          {
-            method: "DELETE",
-          },
-        );
+    try {
+      const resposta = await fetch(
+        `http://localhost:3000/api/usuarios/${usuarioLogado.id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
-        if (resposta.ok) {
-          alert("Sua conta foi purgada com sucesso do sistema.");
-          localStorage.removeItem("@bassgunca:user_session");
-          window.location.href = "/";
-        } else {
-          alert(
-            "Erro ao processar a exclusão no servidor. Verifique o terminal do backend.",
-          );
-        }
-      } catch (erro) {
-        console.error("Erro na requisição de deleção:", erro);
-        alert("Servidor offline ou falha na conexão.");
+      if (resposta.ok) {
+        localStorage.removeItem("@bassgunca:user_session");
+
+        window.location.href = "/";
       }
+    } catch (erro) {
+      alert("Erro ao excluir conta.");
     }
   };
 
-  if (!usuarioLogado)
-    return (
-      <div style={{ color: "#fff", padding: "20px" }}>
-        Carregando módulos...
-      </div>
-    );
+  const handleLogout = () => {
+    localStorage.removeItem("@bassgunca:user_session");
 
-  return (
-    <div
-      style={{
-        padding: "40px 20px",
-        maxWidth: "900px",
-        margin: "0 auto",
-        color: "#fff",
-        minHeight: "80vh",
-        paddingBottom: "100px",
-      }}
-    >
-      {/* CABEÇALHO ESTILO TERMINAL */}
+    window.location.href = "/";
+  };
+
+  if (!usuarioLogado) {
+    return (
       <div
         style={{
-          marginBottom: "40px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          borderBottom: "2px dashed #333",
-          paddingBottom: "20px",
-          flexWrap: "wrap",
-          gap: "20px",
+          color: "#fff",
+          padding: "40px",
         }}
       >
+        Carregando...
+      </div>
+    );
+  }
+
+  return (
+    <div className="config-page">
+      {/* BG */}
+      <div className="config-bg-glow"></div>
+
+      {/* HERO */}
+      <div className="config-hero">
         <div>
-          <h1
-            className="fonte-quadrada"
-            style={{
-              fontSize: "3rem",
-              color: "#fff",
-              margin: 0,
-              letterSpacing: "-2px",
-            }}
-          >
-            <span style={{ color: "#ff003c" }}>SYS</span>.CONFIG
+          <span className="config-badge fonte-quadrada">● SISTEMA ONLINE</span>
+
+          <h1 className="config-title fonte-quadrada">
+            CONFIG<span>URAÇÕES</span>
           </h1>
-          <p
-            className="fonte-texto"
-            style={{
-              color: "#666",
-              marginTop: "5px",
-              fontFamily: "monospace",
-              textTransform: "uppercase",
-            }}
-          >
-            Módulos do Sistema e Preferências
+
+          <p className="config-subtitle fonte-texto">
+            Controle total do seu perfil, privacidade e módulos da cena.
           </p>
         </div>
-        <div
-          style={{
-            textAlign: "right",
-            fontFamily: "monospace",
-            fontSize: "0.85rem",
-          }}
-        >
-          <div
-            style={{
-              color: "#00ff00",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              justifyContent: "flex-end",
-            }}
-          >
-            <div
-              style={{
-                width: "8px",
-                height: "8px",
-                background: "#00ff00",
-                borderRadius: "50%",
-                boxShadow: "0 0 8px #00ff00",
-              }}
-            ></div>
-            STATUS: ONLINE
+
+        <div className="config-profile-card">
+          <div className="config-avatar fonte-quadrada">
+            {usuarioLogado?.vulgo?.charAt(0)?.toUpperCase() ||
+              usuarioLogado?.nome?.charAt(0)?.toUpperCase()}
           </div>
-          <div style={{ color: "#666", marginTop: "5px" }}>
-            ID DE OPERAÇÃO: #{usuarioLogado.id || "0000"}
+
+          <div>
+            <h3 className="fonte-quadrada">
+              @{usuarioLogado?.vulgo || usuarioLogado?.nome}
+            </h3>
+
+            <p className="fonte-texto">USER ID #{usuarioLogado?.id}</p>
           </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "40px" }}>
-        {/* BLOCO 1: SEGURANÇA */}
-        <section className="bloco-config">
-          <h2 className="titulo-bloco">
-            <span className="tag-numero">01</span> CRIPTOGRAFIA E ACESSO
-          </h2>
-          <form
-            onSubmit={handleAlterarSenha}
-            style={{ display: "flex", flexDirection: "column", gap: "25px" }}
-          >
-            <div className="caixa-input">
-              <label>CHAVE DE ACESSO ATUAL</label>
-              <input
+      {/* GRID */}
+      <div className="config-grid">
+        {/* SEGURANÇA */}
+        <section className="config-card">
+          <div className="card-top">
+            <span>01</span>
+
+            <h2 className="fonte-quadrada">SEGURANÇA</h2>
+          </div>
+
+          <form className="config-form" onSubmit={handleAlterarSenha}>
+            <Input
+              label="SENHA ATUAL"
+              type="password"
+              value={senhaAtual}
+              onChange={(e) => setSenhaAtual(e.target.value)}
+            />
+
+            <div className="config-two">
+              <Input
+                label="NOVA SENHA"
                 type="password"
-                placeholder="••••••••"
-                value={senhaAtual}
-                onChange={(e) => setSenhaAtual(e.target.value)}
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+              />
+
+              <Input
+                label="CONFIRMAR"
+                type="password"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
               />
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "20px",
-              }}
-              className="caixa-input"
-            >
-              <div>
-                <label>NOVA CHAVE</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>CONFIRMAR NOVA CHAVE</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                />
-              </div>
-            </div>
-            <button type="submit" className="btn-override">
-              SOBRESCREVER DADOS
+
+            <button type="submit" className="primary-btn fonte-quadrada">
+              ATUALIZAR SENHA
             </button>
           </form>
+
           {mensagem.texto && (
-            <div
-              style={{
-                marginTop: "25px",
-                padding: "15px",
-                background: "#000",
-                borderLeft: `4px solid ${mensagem.tipo === "sucesso" ? "#00ff00" : "#ff003c"}`,
-                color: mensagem.tipo === "sucesso" ? "#00ff00" : "#ff003c",
-                fontFamily: "monospace",
-                fontSize: "0.9rem",
-              }}
-            >
-              {mensagem.texto}
-            </div>
+            <div className={`alert ${mensagem.tipo}`}>{mensagem.texto}</div>
           )}
         </section>
 
-        {/* BLOCO 2: PRIVACIDADE E RADAR */}
-        <section
-          className="bloco-config"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "30px",
-            padding: "0",
-            background: "transparent",
-            border: "none",
-          }}
-        >
-          {/* Sub-bloco: Privacidade */}
-          <div className="bloco-config" style={{ margin: 0 }}>
-            <h2 className="titulo-bloco">
-              <span className="tag-numero">02</span> PRIVACIDADE
-            </h2>
+        {/* PRIVACIDADE */}
+        <section className="config-card">
+          <div className="card-top">
+            <span>02</span>
 
-            <div className="item-toggle">
-              <div>
-                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
-                  MODO FANTASMA
-                </p>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
-                  Ocultar seus eventos favoritados do perfil público.
-                </p>
-              </div>
-              <button
-                onClick={() => setModoFantasma(!modoFantasma)}
-                className={`btn-toggle ${modoFantasma ? "on" : "off"}`}
-              >
-                {modoFantasma ? "[ ON ]" : "[ OFF ]"}
-              </button>
-            </div>
+            <h2 className="fonte-quadrada">PRIVACIDADE</h2>
           </div>
 
-          {/* Sub-bloco: Notificações */}
-          <div className="bloco-config" style={{ margin: 0 }}>
-            <h2 className="titulo-bloco">
-              <span className="tag-numero">03</span> RADAR / ALARMES
-            </h2>
+          <div className="toggle-list">
+            <Toggle
+              titulo="Modo Fantasma"
+              descricao="Ocultar suas atividades e favoritos."
+              ativo={preferencias.modoFantasma}
+              onClick={() => toggle("modoFantasma")}
+            />
 
-            <div
-              className="item-toggle"
-              style={{
-                borderBottom: "1px solid #1a1a1a",
-                paddingBottom: "15px",
-                marginBottom: "15px",
-              }}
-            >
-              <div>
-                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
-                  ALERTA DE LINE-UP
-                </p>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
-                  Avisar quando marcarem seu vulgo em um evento.
-                </p>
-              </div>
-              <button
-                onClick={() => setRadarLineup(!radarLineup)}
-                className={`btn-toggle ${radarLineup ? "on" : "off"}`}
-              >
-                {radarLineup ? "[ ON ]" : "[ OFF ]"}
-              </button>
-            </div>
-
-            <div className="item-toggle">
-              <div>
-                <p style={{ margin: "0 0 5px 0", fontWeight: "bold" }}>
-                  RADAR DE EVENTOS
-                </p>
-                <p style={{ margin: 0, fontSize: "0.8rem", color: "#666" }}>
-                  Receber lembrete 24h antes dos eventos de interesse.
-                </p>
-              </div>
-              <button
-                onClick={() => setRadarEventos(!radarEventos)}
-                className={`btn-toggle ${radarEventos ? "on" : "off"}`}
-              >
-                {radarEventos ? "[ ON ]" : "[ OFF ]"}
-              </button>
-            </div>
+            <Toggle
+              titulo="Perfil Público"
+              descricao="Permitir visualização do perfil."
+              ativo={preferencias.mostrarPerfilPublico}
+              onClick={() => toggle("mostrarPerfilPublico")}
+            />
           </div>
         </section>
 
-        {/* BLOCO 4: ZONA DE PERIGO */}
-        <section className="bloco-config hazard-zone">
-          <div className="hazard-tape"></div>
-          <h2 className="titulo-bloco" style={{ color: "#ff003c" }}>
-            <span className="tag-numero hazard">!</span> ZONA CRÍTICA
-          </h2>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "20px",
-            }}
-          >
-            <div style={{ flex: "1", minWidth: "250px" }}>
-              <p
-                className="fonte-texto"
-                style={{ color: "#aaa", margin: "0 0 10px 0" }}
-              >
-                A exclusão apagará permanentemente seu histórico e presença em
-                line-ups.
-              </p>
-              <p
-                className="fonte-texto"
-                style={{
-                  color: "#ff003c",
-                  margin: 0,
-                  fontWeight: "bold",
-                  fontSize: "0.85rem",
-                }}
-              >
-                ESTA AÇÃO NÃO PODE SER DESFEITA.
-              </p>
-            </div>
-            <button onClick={handleExcluirConta} className="btn-danger">
-              PURGAR CONTA
+        {/* RADAR */}
+        <section className="config-card">
+          <div className="card-top">
+            <span>03</span>
+
+            <h2 className="fonte-quadrada">RADAR</h2>
+          </div>
+
+          <div className="toggle-list">
+            <Toggle
+              titulo="Radar de Eventos"
+              descricao="Receber alertas importantes."
+              ativo={preferencias.radarEventos}
+              onClick={() => toggle("radarEventos")}
+            />
+
+            <Toggle
+              titulo="Radar de Line-up"
+              descricao="Aviso quando citarem seu nome."
+              ativo={preferencias.radarLineup}
+              onClick={() => toggle("radarLineup")}
+            />
+          </div>
+        </section>
+
+        {/* EXPERIÊNCIA */}
+        <section className="config-card">
+          <div className="card-top">
+            <span>04</span>
+
+            <h2 className="fonte-quadrada">EXPERIÊNCIA</h2>
+          </div>
+
+          <div className="toggle-list">
+            <Toggle
+              titulo="Autoplay de Vídeos"
+              descricao="Reprodução automática no feed."
+              ativo={preferencias.autoplayVideos}
+              onClick={() => toggle("autoplayVideos")}
+            />
+
+            <Toggle
+              titulo="Tema Vermelho"
+              descricao="Glow vermelho no sistema."
+              ativo={preferencias.temaVermelho}
+              onClick={() => toggle("temaVermelho")}
+            />
+          </div>
+        </section>
+
+        {/* ZONA CRÍTICA */}
+        <section className="config-card danger-card">
+          <div className="danger-overlay"></div>
+
+          <div className="card-top">
+            <span>05</span>
+
+            <h2 className="fonte-quadrada">ZONA CRÍTICA</h2>
+          </div>
+
+          <p className="danger-text fonte-texto">
+            Essas ações são irreversíveis e afetam permanentemente sua conta.
+          </p>
+
+          <div className="danger-actions">
+            <button
+              onClick={handleLogout}
+              className="secondary-btn fonte-quadrada"
+            >
+              SAIR
+            </button>
+
+            <button
+              onClick={handleExcluirConta}
+              className="danger-btn fonte-quadrada"
+            >
+              EXCLUIR CONTA
             </button>
           </div>
         </section>
       </div>
-
-      <style>{`
-        .bloco-config { background: transparent; padding: 40px; border: 1px solid #1a1a1a; position: relative; }
-        .titulo-bloco { color: '#fff'; margin-bottom: 30px; font-size: 1.2rem; display: flex; align-items: center; gap: 15px; font-family: 'Space Mono', monospace; text-transform: uppercase; }
-        .tag-numero { background: #ff003c; color: #000; padding: 2px 8px; font-size: 1rem; }
-        .tag-numero.hazard { background: transparent; border: 1px solid #ff003c; color: #ff003c; }
-        
-        .caixa-input { background: transparent; padding: 20px; border: 1px dashed #222; }
-        .caixa-input label { display: block; color: #888; margin-bottom: 10px; font-size: 0.8rem; letter-spacing: 1px; font-family: monospace; }
-        .caixa-input input { background: #000; border: 1px solid #333; border-bottom: 2px solid #555; padding: 15px; color: #fff; width: 100%; outline: none; font-family: monospace; font-size: 1rem; transition: all 0.3s; box-sizing: border-box; }
-        .caixa-input input:focus { border-color: #ff003c; background: #050000; box-shadow: 0 0 10px rgba(255,0,60,0.1); }
-        
-        .btn-override { background: #fff; color: #000; border: none; padding: 15px 25px; cursor: pointer; font-weight: bold; font-family: monospace; text-transform: uppercase; letter-spacing: 2px; transition: all 0.2s; width: max-content; align-self: flex-start; }
-        .btn-override:hover { background: #ff003c; color: #fff; box-shadow: 4px 4px 0 #33000c; transform: translate(-2px, -2px); }
-
-        .hazard-zone { border: 1px solid #330000; }
-        .hazard-tape { position: absolute; top: 0; left: 0; right: 0; height: 10px; background: repeating-linear-gradient(45deg, #ff003c, #ff003c 15px, #111 15px, #111 30px); }
-        .btn-danger { background: transparent; color: #ff003c; border: 2px solid #ff003c; padding: 15px 25px; cursor: pointer; font-weight: bold; font-family: monospace; letter-spacing: 1px; transition: all 0.2s; }
-        .btn-danger:hover { background: #ff003c; color: #fff; }
-
-        .item-toggle { display: flex; justify-content: space-between; align-items: center; font-family: monospace; gap: 20px; }
-        .btn-toggle { background: transparent; border: none; font-family: monospace; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; padding: 5px 10px; }
-        .btn-toggle.on { color: #00ff00; text-shadow: 0 0 8px rgba(0,255,0,0.4); }
-        .btn-toggle.off { color: #555; }
-        .btn-toggle:hover { opacity: 0.8; }
-      `}</style>
     </div>
   );
 };
+
+function Input({ label, type, value, onChange }) {
+  return (
+    <div className="input-group">
+      <label>{label}</label>
+
+      <input type={type} value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+function Toggle({ titulo, descricao, ativo, onClick }) {
+  return (
+    <div className="toggle-item">
+      <div>
+        <h4 className="fonte-quadrada">{titulo}</h4>
+
+        <p className="fonte-texto">{descricao}</p>
+      </div>
+
+      <button
+        onClick={onClick}
+        className={`toggle-btn ${ativo ? "on" : "off"}`}
+      ></button>
+    </div>
+  );
+}
 
 export default Configuracoes;

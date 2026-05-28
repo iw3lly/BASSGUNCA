@@ -1,0 +1,654 @@
+/* =========================================
+   CONFIG PAGE
+========================================= */
+
+.config-page {
+  position: relative;
+
+  padding: 60px;
+
+  max-width: 1500px;
+
+  margin: 0 auto;
+
+  color: #fff;
+
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  padding-bottom: 140px;
+}
+
+/* BG FX */
+
+.config-bg-glow {
+  position: absolute;
+
+  width: 900px;
+  height: 900px;
+
+  top: -300px;
+  right: -300px;
+
+  background: radial-gradient(circle, rgba(255, 0, 60, 0.12), transparent 70%);
+
+  filter: blur(100px);
+
+  pointer-events: none;
+
+  z-index: 0;
+}
+
+.config-page::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+
+  background-size: 50px 50px;
+
+  opacity: 0.4;
+
+  pointer-events: none;
+}
+
+/* =========================================
+   HERO
+========================================= */
+
+.config-hero {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 40px;
+
+  margin-bottom: 60px;
+
+  flex-wrap: wrap;
+}
+
+.config-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #ff003c;
+
+  letter-spacing: 2px;
+
+  font-size: 0.82rem;
+
+  padding: 10px 16px;
+
+  border-radius: 999px;
+
+  background: rgba(255, 0, 60, 0.08);
+
+  border: 1px solid rgba(255, 0, 60, 0.15);
+
+  box-shadow:
+    0 0 20px rgba(255, 0, 60, 0.08),
+    inset 0 0 20px rgba(255, 0, 60, 0.04);
+}
+
+.config-title {
+  font-size: clamp(3.5rem, 9vw, 6rem);
+
+  line-height: 0.92;
+
+  margin: 18px 0;
+
+  letter-spacing: -4px;
+}
+
+.config-title span {
+  color: #ff003c;
+
+  text-shadow:
+    0 0 25px rgba(255, 0, 60, 0.7),
+    0 0 60px rgba(255, 0, 60, 0.25);
+}
+
+.config-subtitle {
+  max-width: 620px;
+
+  color: #777;
+
+  line-height: 1.8;
+
+  font-size: 1rem;
+}
+
+/* =========================================
+   PROFILE CARD
+========================================= */
+
+.config-profile-card {
+  position: relative;
+
+  background: rgba(12, 12, 12, 0.78);
+
+  backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  border-radius: 30px;
+
+  padding: 24px;
+
+  min-width: 320px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.config-profile-card::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 0, 60, 0.12),
+    transparent 55%
+  );
+
+  pointer-events: none;
+}
+
+.config-avatar {
+  width: 76px;
+  height: 76px;
+
+  border-radius: 22px;
+
+  background: linear-gradient(135deg, #ff003c, #5a0015);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 2rem;
+
+  box-shadow: 0 0 40px rgba(255, 0, 60, 0.35);
+}
+
+.config-profile-card h3 {
+  margin: 0 0 6px 0;
+
+  font-size: 1.15rem;
+}
+
+.config-profile-card p {
+  margin: 0;
+
+  color: #666;
+}
+
+/* =========================================
+   GRID
+========================================= */
+
+.config-grid {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+
+  gap: 26px;
+}
+
+/* =========================================
+   CARDS
+========================================= */
+
+.config-card {
+  position: relative;
+
+  background: linear-gradient(
+    180deg,
+    rgba(16, 16, 16, 0.94),
+    rgba(7, 7, 7, 0.96)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  border-radius: 32px;
+
+  padding: 34px;
+
+  overflow: hidden;
+
+  transition:
+    transform 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.config-card::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 0, 60, 0.08),
+    transparent 60%
+  );
+
+  pointer-events: none;
+}
+
+.config-card:hover {
+  transform: translateY(-4px);
+
+  border-color: rgba(255, 0, 60, 0.2);
+
+  box-shadow: 0 25px 80px rgba(255, 0, 60, 0.08);
+}
+
+/* =========================================
+   CARD HEADER
+========================================= */
+
+.card-top {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-bottom: 30px;
+}
+
+.card-top span {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #ff003c, #b1002a);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.85rem;
+  font-weight: bold;
+
+  box-shadow: 0 0 25px rgba(255, 0, 60, 0.4);
+}
+
+.card-top h2 {
+  margin: 0;
+
+  font-size: 1.1rem;
+
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+.config-two {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 18px;
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.input-group label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #777;
+
+  font-size: 0.78rem;
+
+  letter-spacing: 1px;
+
+  font-family: monospace;
+}
+
+.input-group input {
+  width: 100%;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  background: rgba(0, 0, 0, 0.45);
+
+  color: #fff;
+
+  outline: none;
+
+  transition: 0.25s ease;
+
+  box-sizing: border-box;
+
+  font-size: 0.96rem;
+}
+
+.input-group input:focus {
+  border-color: rgba(255, 0, 60, 0.4);
+
+  background: rgba(10, 0, 2, 0.7);
+
+  box-shadow:
+    0 0 0 4px rgba(255, 0, 60, 0.08),
+    0 0 30px rgba(255, 0, 60, 0.12);
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  border: none;
+
+  cursor: pointer;
+
+  border-radius: 18px;
+
+  padding: 16px 24px;
+
+  transition: 0.24s ease;
+
+  letter-spacing: 1px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #ff003c, #b1002a);
+
+  color: #fff;
+
+  box-shadow: 0 15px 35px rgba(255, 0, 60, 0.22);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 20px 45px rgba(255, 0, 60, 0.35);
+}
+
+.secondary-btn {
+  background: #161616;
+
+  color: #fff;
+}
+
+.secondary-btn:hover {
+  background: #1f1f1f;
+}
+
+.danger-btn {
+  background: transparent;
+
+  border: 1px solid rgba(255, 0, 60, 0.25);
+
+  color: #ff003c;
+}
+
+.danger-btn:hover {
+  background: #ff003c;
+
+  color: #fff;
+
+  box-shadow: 0 0 40px rgba(255, 0, 60, 0.35);
+}
+
+/* =========================================
+   TOGGLES
+========================================= */
+
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 24px;
+
+  padding: 22px;
+
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.04);
+
+  transition: 0.24s ease;
+}
+
+.toggle-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+
+  transform: translateX(2px);
+}
+
+.toggle-item h4 {
+  margin: 0 0 6px 0;
+
+  font-size: 1rem;
+}
+
+.toggle-item p {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 0.9rem;
+
+  line-height: 1.5;
+}
+
+/* SWITCH */
+
+.toggle-btn {
+  position: relative;
+
+  width: 78px;
+  height: 42px;
+
+  border-radius: 999px;
+
+  border: none;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+
+  flex-shrink: 0;
+}
+
+.toggle-btn::before {
+  content: "";
+
+  position: absolute;
+
+  top: 5px;
+  left: 5px;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  transition: 0.25s ease;
+}
+
+.toggle-btn.on {
+  background: linear-gradient(135deg, #00ff88, #00aa5b);
+
+  box-shadow: 0 0 30px rgba(0, 255, 120, 0.3);
+}
+
+.toggle-btn.on::before {
+  left: 41px;
+}
+
+.toggle-btn.off {
+  background: #1a1a1a;
+}
+
+/* =========================================
+   ALERTS
+========================================= */
+
+.alert {
+  margin-top: 22px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  font-family: monospace;
+}
+
+.alert.sucesso {
+  background: rgba(0, 255, 100, 0.08);
+
+  border: 1px solid rgba(0, 255, 100, 0.2);
+
+  color: #00ff88;
+}
+
+.alert.erro {
+  background: rgba(255, 0, 60, 0.08);
+
+  border: 1px solid rgba(255, 0, 60, 0.2);
+
+  color: #ff003c;
+}
+
+/* =========================================
+   DANGER
+========================================= */
+
+.danger-card {
+  border: 1px solid rgba(255, 0, 60, 0.15);
+}
+
+.danger-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(135deg, rgba(255, 0, 60, 0.08), transparent 60%);
+
+  pointer-events: none;
+}
+
+.danger-text {
+  color: #888;
+
+  margin-bottom: 26px;
+
+  line-height: 1.7;
+}
+
+.danger-actions {
+  display: flex;
+
+  gap: 16px;
+
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 900px) {
+  .config-page {
+    padding: 28px;
+    padding-bottom: 120px;
+  }
+
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-two {
+    grid-template-columns: 1fr;
+  }
+
+  .config-profile-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .config-title {
+    font-size: 3rem;
+
+    letter-spacing: -2px;
+  }
+
+  .config-card {
+    padding: 24px;
+  }
+
+  .toggle-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toggle-btn {
+    width: 100%;
+  }
+
+  .danger-actions {
+    flex-direction: column;
+  }
+
+  .danger-actions button {
+    width: 100%;
+  }
+}

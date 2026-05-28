@@ -28,7 +28,6 @@ const ListaEventos = ({
   });
 
   const hoje = new Date();
-
   const hojeString = `${hoje.getFullYear()}-${String(
     hoje.getMonth() + 1,
   ).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
@@ -37,38 +36,37 @@ const ListaEventos = ({
     if (!e.data_hora) return false;
 
     const dataEvento = new Date(e.data_hora);
-
     const dataEventoString = `${dataEvento.getFullYear()}-${String(
       dataEvento.getMonth() + 1,
     ).padStart(2, "0")}-${String(dataEvento.getDate()).padStart(2, "0")}`;
 
-    const busca = filtroTexto.toLowerCase();
+    // LÓGICA PARA SEPARAR EVENTOS PASSADOS DOS ATUAIS
+    const isPassado = dataEventoString < hojeString;
 
+    if (abaRapida === "passados") {
+      // Se a aba for "passados", esconde o que for do futuro/hoje
+      if (!isPassado) return false;
+    } else {
+      // Para todas as outras abas (tudo, hoje, populares), esconde os passados
+      if (isPassado) return false;
+    }
+
+    const busca = filtroTexto.toLowerCase();
     const matchTexto =
       e.titulo?.toLowerCase().includes(busca) ||
       e.local?.toLowerCase().includes(busca) ||
       e.lista_artistas?.toLowerCase().includes(busca);
 
     if (!matchTexto) return false;
-
     if (abaRapida === "hoje" && dataEventoString !== hojeString) return false;
-
     if (dataEspecifica && dataEventoString !== dataEspecifica) return false;
-
     if (filtroValor === "gratis" && e.valorExibicao > 0) return false;
-
     if (filtroValor === "30" && e.valorExibicao > 30) return false;
-
     if (filtroValor === "50" && e.valorExibicao > 50) return false;
-
     if (filtroValor === "80" && e.valorExibicao > 80) return false;
-
     if (filtroValor === "100" && e.valorExibicao > 100) return false;
-
     if (filtroValor === "150" && e.valorExibicao > 150) return false;
-
     if (filtroValor === "250" && e.valorExibicao > 250) return false;
-
     if (filtroValor === "premium" && e.valorExibicao < 250) return false;
 
     return true;
@@ -76,6 +74,11 @@ const ListaEventos = ({
 
   if (abaRapida === "populares") {
     eventosFiltrados.sort((a, b) => b.qtdInteressados - a.qtdInteressados);
+  } else if (abaRapida === "passados") {
+    // Eventos passados ficam melhor ordenados do mais recente para o mais antigo
+    eventosFiltrados.sort(
+      (a, b) => new Date(b.data_hora) - new Date(a.data_hora),
+    );
   } else {
     eventosFiltrados.sort(
       (a, b) => new Date(a.data_hora) - new Date(b.data_hora),
@@ -164,6 +167,16 @@ const ListaEventos = ({
               💥 EM ALTA
             </button>
 
+            {/* NOVA ABA PARA EVENTOS PASSADOS */}
+            <button
+              onClick={() => setAbaRapida("passados")}
+              className={`filter-pill ${
+                abaRapida === "passados" ? "active" : ""
+              }`}
+            >
+              ⏪ PASSADOS
+            </button>
+
             <select
               value={filtroValor}
               onChange={(e) => setFiltroValor(e.target.value)}
@@ -171,21 +184,13 @@ const ListaEventos = ({
               style={{ background: "#0d0d0d" }}
             >
               <option value="todos">QUALQUER VALOR</option>
-
               <option value="gratis">0800 / FREE</option>
-
               <option value="30">ATÉ R$30</option>
-
               <option value="50">ATÉ R$50</option>
-
               <option value="80">ATÉ R$80</option>
-
               <option value="100">ATÉ R$100</option>
-
               <option value="150">ATÉ R$150</option>
-
               <option value="250">ATÉ R$250</option>
-
               <option value="premium">PREMIUM / OPEN BAR</option>
             </select>
 
@@ -266,7 +271,7 @@ const ListaEventos = ({
 
                   <span
                     style={{
-                      color: "#ff003c",
+                      color: abaRapida === "passados" ? "#777" : "#ff003c", // Cor difere se for evento antigo
                       fontWeight: "bold",
                       fontFamily: "monospace",
                     }}
@@ -280,7 +285,7 @@ const ListaEventos = ({
                 <h2
                   className="fonte-quadrada"
                   style={{
-                    color: "#fff",
+                    color: abaRapida === "passados" ? "#888" : "#fff", // Escurece o título para passados
                     fontSize: "2rem",
                     lineHeight: "1",
                     marginBottom: "15px",
@@ -323,8 +328,11 @@ const ListaEventos = ({
                     <div
                       className="badge-premium"
                       style={{
-                        background: "rgba(255,0,60,0.12)",
-                        color: "#ff003c",
+                        background:
+                          abaRapida === "passados"
+                            ? "rgba(255,255,255,0.04)"
+                            : "rgba(255,0,60,0.12)",
+                        color: abaRapida === "passados" ? "#aaa" : "#ff003c",
                       }}
                     >
                       🎵 {evento.generos}
@@ -342,6 +350,9 @@ const ListaEventos = ({
                   <button
                     onClick={() => abrirDetalheEvento(evento)}
                     className="card-button-main"
+                    style={{
+                      opacity: abaRapida === "passados" ? 0.7 : 1,
+                    }}
                   >
                     VER EVENTO
                   </button>
@@ -352,6 +363,8 @@ const ListaEventos = ({
                     style={{
                       background: taInteressado ? "#ff003c" : "transparent",
                       color: taInteressado ? "#fff" : "#ff003c",
+                      opacity: abaRapida === "passados" ? 0.5 : 1,
+                      pointerEvents: abaRapida === "passados" ? "none" : "auto", // Desativa curtida em eventos antigos
                     }}
                   >
                     {taInteressado ? "🔥" : "♡"}
